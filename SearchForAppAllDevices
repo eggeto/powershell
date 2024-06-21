@@ -30,7 +30,7 @@ foreach ($device in $responseAllDevices){
         if ($app.displayName -like $searchApp){
        
             $appsPerDevice += $app
-            Write-Host $appsPerDevice
+
         }
     }
 
