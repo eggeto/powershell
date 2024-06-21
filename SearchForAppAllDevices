@@ -1,0 +1,51 @@
+##################################################################
+######################Search For App All Devices##################
+######################      BETA   ###############################
+##################################################################
+
+#search for app, change this!!!!!!!!
+$searchApp = "*Belg*"
+
+
+#connect to microsoft graph
+Connect-MgGraph #-scope !!yet to find out!!
+
+#get all devices
+$uriAllDevice = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices"
+
+$responseAllDevices = (Invoke-MgGraphRequest -uri $uriAllDevice -Method Get -OutputType PSObject).value
+$appsPerDevice = @()
+$count = 0
+foreach ($device in $responseAllDevices){
+    
+    #Get Intune Device Id
+    $intuneID = "'" + $device.id + "'"
+
+    #Get all detected Apps for intune device id
+    $uriDetectedApps = "https://graph.microsoft.com/beta/deviceManagement/manageddevices($intuneId)/detectedApps"
+    $responsesApps = (Invoke-MgGraphRequest -uri $uriDetectedApps -Method Get -OutputType PSObject).value
+    
+    #looking for specifia app
+    foreach ($app in $responsesApps){
+        if ($app.displayName -like $searchApp){
+       
+            $appsPerDevice += $app
+            Write-Host $appsPerDevice
+        }
+    }
+
+    $appsPerDevice += [PSCustomObject][ordered]@{
+        NumberDevice = $count
+        DeviceName  = $device.deviceName
+        User        = $device.userPrincipalName
+        Appname     = $appsPerDevice.displayName
+        appversion  = $appsPerDevice.version
+        }
+        $count += 1
+}
+
+#output
+$appsPerDevice
+
+Disconnect-MgGraph
+
