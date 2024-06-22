@@ -26,6 +26,7 @@ foreach ($device in $responseAllDevices){
     $responsesApps = (Invoke-MgGraphRequest -uri $uriDetectedApps -Method Get -OutputType PSObject).value
     
     #looking for specifia app
+    #$responsesApps | where-object {$_.displayName -like $searchApp}
     foreach ($app in $responsesApps){
         if ($app.displayName -like $searchApp){
        
