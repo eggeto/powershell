@@ -3,12 +3,11 @@
 ######################      BETA   ###############################
 ##################################################################
 
-#search for app, change this!!!!!!!!
-$searchApp = "*Belg*"
-
-
 #connect to microsoft graph
 Connect-MgGraph #-scope !!yet to find out!!
+
+#search for app, change this!!!!!!!!
+$searchApp = "*Dell*"
 
 #get all devices
 $uriAllDevice = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices"
@@ -25,28 +24,23 @@ foreach ($device in $responseAllDevices){
     $uriDetectedApps = "https://graph.microsoft.com/beta/deviceManagement/manageddevices($intuneId)/detectedApps"
     $responsesApps = (Invoke-MgGraphRequest -uri $uriDetectedApps -Method Get -OutputType PSObject).value
     
-    #looking for specifia app
-    #$responsesApps | where-object {$_.displayName -like $searchApp}
+    #looking for specific app
     foreach ($app in $responsesApps){
         if ($app.displayName -like $searchApp){
-       
-            $appsPerDevice += $app
 
+            $appsPerDevice += [PSCustomObject][ordered]@{
+                NumberDevice = $count
+                DeviceName  = $device.deviceName
+                User        = $device.userPrincipalName
+                Appname     = ($app.displayName -join ',')
+                appversion  = ($app.version -join ',')
+                }    
         }
-    }
-
-    $appsPerDevice += [PSCustomObject][ordered]@{
-        NumberDevice = $count
-        DeviceName  = $device.deviceName
-        User        = $device.userPrincipalName
-        Appname     = $appsPerDevice.displayName
-        appversion  = $appsPerDevice.version
-        }
+    }    
         $count += 1
 }
 
 #output
-$appsPerDevice
+$appsPerDevice | export-csv -path "c:\temp\excel2.csv"
 
 Disconnect-MgGraph
-
