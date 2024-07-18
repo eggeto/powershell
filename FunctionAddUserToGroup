@@ -9,7 +9,7 @@ function AddUserToGroup {
 
     $jsonGroup = @"
     {   
-        "@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/{$userIdTest}"
+        "@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/{$userId}"
     }
 "@ 
 #    "@odata.id": "https://graph.microsoft.com/v1.0/users/{$userIdTest}" works also!
