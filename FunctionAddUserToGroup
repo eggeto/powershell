@@ -7,11 +7,11 @@ function AddUserToGroup {
     #`$ref escaping ` $ref!!!!
     $uriGroup =  "https://graph.microsoft.com/v1.0/groups/{$groupId}/members/`$ref" 
 
-    $jsonGroup = @"
-    {   
-        "@odata.id": "https://graph.microsoft.com/v1.0/directoryObjects/{$userId}"
-    }
-"@ 
+        $jsonGroup = 
+    @{
+        "@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$userId"
+    } | convertTo-Json
+
 #    "@odata.id": "https://graph.microsoft.com/v1.0/users/{$userIdTest}" works also!
 
     Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json"
