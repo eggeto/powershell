@@ -3,7 +3,7 @@ Version 1.1
 look up device information by devicename or device ID or AAD device ID or email adres (UPN) from user
 
 need to fix the follow:
-if a user have more devices it will only take the first 
+if a user have more devices it will only take the first one
 add option if you know what kind of filter you want to use 
 error when input is aad device id > give warning
 
@@ -51,7 +51,7 @@ function DeviceAllLookUp {
         azureAdDeviceId     = $responseDevice.azureAdDeviceId
         deviceName          = $responseDevice.deviceName 
         userEmail           = $responseDevice.UserPrincipalName 
-        #add what you need certainly if you use the option $addSelect
+        #add/modify what you need certainly if you use the option $addSelect
     }
 }
 
