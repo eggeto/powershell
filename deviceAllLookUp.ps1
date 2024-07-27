@@ -26,7 +26,7 @@ function DeviceAllLookUp {
         $addFilter = $filterUpn
     }
     elseif ($information -match $pattern) {
-        $addFilter = $input1 
+        $addFilter = $information 
     }
     else {
         $addFilter = $filterDeviceName
