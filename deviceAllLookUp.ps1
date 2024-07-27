@@ -50,10 +50,10 @@ function DeviceAllLookUp {
     $alldeviceInformation = @()
     foreach ($device in $responsedevice){
         $deviceInformation = [PSCustomObject][ordered]@{
-            intuneDeviceId      = $responseDevice.Id
-            azureAdDeviceId     = $responseDevice.azureAdDeviceId
-            deviceName          = $responseDevice.deviceName 
-            userEmail           = $responseDevice.UserPrincipalName 
+            intuneDeviceId      = $device.Id
+            azureAdDeviceId     = $device.azureAdDeviceId
+            deviceName          = $device.deviceName 
+            userEmail           = $device.UserPrincipalName 
             #add/modify what you need certainly if you use the option $addSelect
         }
         $allDeviceInformation += $deviceInformation
