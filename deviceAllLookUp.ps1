@@ -57,14 +57,19 @@ function DeviceAllLookUp {
             #add/modify what you need certainly if you use the option $addSelect
         }
         $allDeviceInformation += $deviceInformation
-    return $alldeviceInformation
+    }
 }
 
 $information = read-host "Enter DeviceName, DeviceId or UserPrincipalName"
 $test = DeviceAllLookUp -information $information
+
 $test.deviceName
 $test.userEmail
 $test.intuneDeviceId
 $test.azureAdDeviceId
+
+$test[0].deviceName
+$test[1].userEmail
+$test
 
 disconnect-mggraph
