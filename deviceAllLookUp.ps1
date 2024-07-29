@@ -58,6 +58,7 @@ function DeviceAllLookUp {
         }
         $allDeviceInformation += $deviceInformation
     }
+    return $allDeviceInformation
 }
 
 $information = read-host "Enter DeviceName, DeviceId or UserPrincipalName"
