@@ -1,0 +1,137 @@
+browsel device and groups
+
+<#
+    controleren als er een device in een groep zit,
+    als de primairy user een cevi adres heeft
+
+    controleren welke toestellen er niet in een group zitten
+#>
+connect-mggraph
+
+function DeviceAllLookUp {
+    param (
+        $information,
+        $chooseFilter,
+        $addToFilterSelect
+    )
+    $addFilter = ""
+    $addToFilterSelect = ""
+    #id,deviceName,serialNumber,model ...
+
+    $addSelect = "&`$select=$addToFilterSelect"
+    $filterUpn = "?`$filter=userPrincipalName eq '$information'"
+    $filterDeviceName = "?`$filter=deviceName eq '$information'"
+    $pattern = "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+
+    if ($information.Contains("@")){
+        $addFilter = $filterUpn
+    }
+    elseif ($information -match $pattern) {
+        $addFilter = $information 
+    }
+    else {
+        $addFilter = $filterDeviceName
+    }
+
+    $uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices"
+    $uriFilter = "$uri/$addFilter$addSelect"
+
+    $responseDevice = (Invoke-MgGraphRequest -Method GET -uri $uriFilter -ErrorAction SilentlyContinue -StatusCodeVariable "SCV").value 
+    
+    $alldeviceInformation = @()
+    foreach ($device in $responsedevice){
+        return $device
+        $deviceInformation = [PSCustomObject][ordered]@{
+            intuneDeviceId      = $device.Id
+            azureAdDeviceId     = $device.azureAdDeviceId
+            deviceName          = $device.deviceName 
+            userEmail           = $device.UserPrincipalName 
+            #deviceGraphId       = $device
+            #add/modify what you need certainly if you use the option $addSelect
+        }
+        $allDeviceInformation += $deviceInformation
+    }
+    return $alldeviceInformation
+}
+
+function MemberOf {
+    param (
+        $aadDeviceId,
+        $userInformation,
+        $groupInformation
+    )
+
+    if ($aadDeviceId){
+        $filterdeviceId = "?`$filter=deviceId eq '$aadDeviceId'"
+        $uri = "https://graph.microsoft.com/v1.0/devices/$filterdeviceId"
+    
+        $deviceId = (Invoke-MgGraphRequest -Method GET -uri $uri).value
+        $deviceIdGroup = $deviceId.id
+    
+        $uriGroup = "https://graph.microsoft.com/v1.0/devices/$deviceIdGroup/memberOf"
+    
+        $memberOfGroup = (Invoke-MgGraphRequest -Method GET -uri $uriGroup ).value #-OutputType PSObject
+        $memberOfGroup.displayName
+    }
+    elseif ($userInformation) {
+        $uriUser = "https://graph.microsoft.com/v1.0/users/$userInformation/memberOf"
+        $responceUser = (Invoke-GraphRequest -Method GET -uri $uriUser).value
+        $responceUser
+    }
+    elseif ($groupInformation) {
+        $uriGroup = "https://graph.microsoft.com/v1.0/groups/$groupInformation/members"
+        $responceGroup = (Invoke-GraphRequest -Method GET -uri $uriGroup).value
+        $responceGroup.displayName
+    }
+}
+
+
+
+<#
+poging 1 > verkeerde aaddevcie id!!!!
+
+$count = 0
+$uri = "https://graph.microsoft.com/v1.0/devices"
+
+$responceAllDevices = (Invoke-GraphRequest -Method GET -uri $uri ).value #-OutputType PSObject
+#$responceAllDevices.GetType()
+$deviceInformation = @{}
+foreach ($device in $responceAllDevices){
+    #write-host $count  $device.displayName  $device.id
+    $deviceInformation[$device.displayName] = $device.id
+    $count ++
+}
+
+$deviceinformation
+
+
+#https://arcanecode.com/2020/12/14/iterate-over-a-hashtable-in-powershell/
+
+$count = 0
+foreach ($deviceInfo in $deviceInformation.GetEnumerator()){
+    write-host $count $deviceInfo.key $deviceInfo.value
+    $count ++
+}
+
+#>
+
+
+
+$uri = "https://graph.microsoft.com/v1.0/devices"
+
+$responceAllDevices = (Invoke-GraphRequest -Method GET -uri $uri ).value #-OutputType PSObject
+
+$testhash = @{}
+#test = @()
+#$count = 1
+foreach ($deviceInfo in $deviceInformation.GetEnumerator()){
+    $deviceInfo.value
+    $test =  MemberOf -aadDeviceId $deviceInfo.value
+    $test                                                          
+    $testhash[$deviceInfo.key] = $test
+    $testhash
+}
+
+
+
+
