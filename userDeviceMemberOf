@@ -1,0 +1,140 @@
+<#
+version 1
+!!!!!!!!!!!!!!under construction!!!!!!!!!!!!!!!
+Get from all users the device + what group  the device is member of
+
+Unable to index into an object of type "System.Management.Automation.ScriptBlock". => hash => @{}  not {}!!
+
+log:
+make basic script,
+#>
+connect-mggraph
+
+function DeviceAllLookUp {
+    param (
+        $information,
+        $chooseFilter,
+        $addToFilterSelect
+    )
+    $addFilter = ""
+    $addToFilterSelect = ""
+    #id,deviceName,serialNumber,model ...
+
+    $addSelect = "&`$select=$addToFilterSelect"
+    $filterUpn = "?`$filter=userPrincipalName eq '$information'"
+    $filterDeviceName = "?`$filter=deviceName eq '$information'"
+    $pattern = "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+
+    if ($information.Contains("@")){
+        $addFilter = $filterUpn
+    }
+    elseif ($information -match $pattern) {
+        $addFilter = $information 
+    }
+    else {
+        $addFilter = $filterDeviceName
+    }
+
+    $uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices"
+    $uriFilter = "$uri/$addFilter$addSelect"
+
+    $responseDevice = (Invoke-MgGraphRequest -Method GET -uri $uriFilter -ErrorAction SilentlyContinue -StatusCodeVariable "SCV").value 
+    
+    $alldeviceInformation = @()
+    foreach ($device in $responsedevice){
+        return $device
+        $deviceInformation = [PSCustomObject][ordered]@{
+            intuneDeviceId      = $device.Id
+            azureAdDeviceId     = $device.azureAdDeviceId
+            deviceName          = $device.deviceName 
+            userEmail           = $device.UserPrincipalName 
+            #deviceGraphId       = $device
+            #add/modify what you need certainly if you use the option $addSelect
+        }
+        $allDeviceInformation += $deviceInformation
+    }
+    return $alldeviceInformation
+}
+
+function MemberOf {
+    param (
+        $aadDeviceId,
+        $userInformation,
+        $groupInformation
+    )
+    if ($aadDeviceId){
+        $filterdeviceId = "?`$filter=deviceId eq '$aadDeviceId'"
+        $uri = "https://graph.microsoft.com/v1.0/devices/$filterdeviceId"
+    
+        $deviceId = (Invoke-MgGraphRequest -Method GET -uri $uri).value
+        $deviceIdGroup = $deviceId.id
+    
+        $uriGroup = "https://graph.microsoft.com/v1.0/devices/$deviceIdGroup/memberOf"
+    
+        $memberOfGroup = (Invoke-MgGraphRequest -Method GET -uri $uriGroup -OutputType PSObject ).value #
+        $memberOfGroup.displayName
+    }
+    elseif ($userInformation) {
+        $uriUser = "https://graph.microsoft.com/v1.0/users/$userInformation/memberOf"
+        $responceUser = (Invoke-GraphRequest -Method GET -uri $uriUser).value
+        $responceUser
+    }
+    elseif ($groupInformation) {
+        $uriGroup = "https://graph.microsoft.com/v1.0/groups/$groupInformation/members"
+        $responceGroup = (Invoke-GraphRequest -Method GET -uri $uriGroup).value
+        $responceGroup.displayName
+    }
+}
+
+#get all employees with a certain 
+
+$uriUsers = "https://graph.microsoft.com/v1.0/users"
+$responceAllUsers = (Invoke-GraphRequest -Method GET -uri $uriUsers).value
+
+#Get all user principal names
+$allUpn = $responceAllUsers.userPrincipalName
+#$allUpn
+
+#get the azure object id from the devices via UPN + user filtering !!!!!!!!!!error handeling  !!!!!!!!!!
+$hashUserAadDEviceID = @{}
+#external device or ... with no azure id id in your tenant
+$deviceNoAadID = @()
+$userFilter = "*YOUR DOMAIN NAME*"
+foreach ($upn in $allUpn.GetEnumerator()){
+    if ($upn -like "*onmicrosoft.com*") {
+        break
+    }
+    elseif($upn -like $userFilter) {
+        $aadDeviceId = DeviceAllLookUp -information $upn
+        if ($null -eq $aadDeviceId) {
+            $deviceNoAadID += $upn
+        }
+        else {
+            $hashUserAadDEviceID[$upn] = $aadDeviceId.azureAdDeviceId
+        }
+    } 
+    else {
+        break
+    }   
+}
+
+$hashUserAadDEviceID
+#hash with email and member of groups
+$hashUserGroup = @{}
+$userGroup = @()
+#loop user principal name + is member of the follow groups
+foreach ($user in $hashUserAadDEviceID.GetEnumerator()) {
+    try {
+        $userGroup += MemberOf -aadDeviceId $user.Value
+        $usermail = $user.Key
+        $hashUserGroup[$usermail] = $userGroup
+    } catch {
+        Write-Error "Failed to get group membership for $($user.Key): $_"
+    }
+}
+$hashUserGroup
+write-host "users that have a device with no Azure Ad object ID 
+$deviceNoAadID
+it can be the device is member of an other tenant"
+
+Disconnect-MgGraph
