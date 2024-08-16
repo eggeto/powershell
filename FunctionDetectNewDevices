@@ -1,0 +1,27 @@
+function GetAllNewDevices {
+    param(
+        [datetime]$startDate,
+        [datetime]$endDate
+    )
+
+    $startDate = $startDate.ToUniversalTime().ToString('O')
+    $endDate = $endDate.ToUniversalTime().ToString('O')
+
+    $filter = "`$filter=enrolledDateTime ge '$startDate' and enrolledDateTime le '$endDate'"
+    $uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices?$filter"
+
+    $devices = Invoke-MgGraphRequest -Method GET -uri $uri
+
+    return $devices
+}
+
+connect-MgGraph
+
+$startDate = (Get-Date).AddDays(-2) #days before the start date
+$endDate = Get-Date
+
+$newDevices = GetAllNewDevices -startDate $startDate -endDate $endDate
+
+Write-Host $newDevices
+
+Disconnect-MgGraph
