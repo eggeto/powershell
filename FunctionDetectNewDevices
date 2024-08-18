@@ -21,7 +21,7 @@ function GetAllNewDevices {
     $startDate = $startDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mmZ')
     $endDate = $endDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mmZ')
 
-    $filter = "`$filter=enrolledDateTime ge $startDate and enrolledDateTime le $endDate"
+    $filter = "`$filter=enrolledDateTime ge $startDate" # and enrolledDateTime le $endDate" => if you want devices between a certain date uncommand $enddate
     $uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices?$filter"
     write-host $uri
 
@@ -33,7 +33,7 @@ function GetAllNewDevices {
 connect-MgGraph
 
 $startDate = (Get-Date).AddDays(-250) #days before the start date
-$endDate = Get-Date
+#$endDate = Get-Date
 
 $newDevices = GetAllNewDevices -startDate $startDate -endDate $endDate
 
