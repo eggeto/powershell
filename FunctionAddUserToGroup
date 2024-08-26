@@ -1,3 +1,55 @@
+<#
+Made by: Eggeto
+
+Add a user to a group function
+
+logs:
+Jul 17, 2024
+creating basic function
+
+Aug 26, 2024
+Adding troubleshooting + fine tuning + function give some feedback
+#>
+
+#Aug 26, 2024 version
+function AddUserToGroup {
+    param (
+        [string]$groupId,
+        [string]$userID
+    )
+    #Finding group info
+    $uriGroup = "https://graph.microsoft.com/v1.0/groups/$groupId"
+    $groupName = Invoke-MgGraphRequest -Method GET -Uri $uriGroup -ErrorAction SilentlyContinue
+    $groupName = $groupName.displayName
+
+    #Checking if user is already member of the group
+    $uriUser = "$uriGroup/members" 
+    $checkUser = (Invoke-MgGraphRequest -Method GET -Uri $uriUser -ErrorAction SilentlyContinue).value
+
+    if ($userId -like $checkUser.id){
+        return "user: $($checkUser.mail) is already member of group: $groupName"
+    }
+
+    #adding user to group
+    $uriGroup =  "$uriUser/`$ref" 
+
+    $jsonGroup = 
+    @{
+        "@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$userId"
+    } | convertTo-Json
+    # "@odata.id": "https://graph.microsoft.com/v1.0/users/{$userIdTest}" works also!
+
+    Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json" -StatusCodeVariable "status"
+    if ($status -eq "204"){
+        return "Added user: $($checkUser.mail) to group: $groupName"
+    }
+    else{
+        return "something went wrong HTTP status code: $status"
+    }
+}
+
+#or the basic function (Jul 17, 2024)
+
 function AddUserToGroup {
     param (
         $groupId,
@@ -14,7 +66,7 @@ function AddUserToGroup {
 
 #    "@odata.id": "https://graph.microsoft.com/v1.0/users/{$userIdTest}" works also!
 
-    Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json"
+    Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json" -ErrorAction SilentlyContinue
 }
 
 
