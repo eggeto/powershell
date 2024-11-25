@@ -1,0 +1,87 @@
+<#
+  non compliance devices in intune
+logs:
+made scipt 25/11/2024
+
+to do:
+better naming
+...
+
+Made by Eggeto
+#>
+function GetAllNonComplianceDevices {
+  param (
+  )
+  $uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices?`$filter=complianceState eq 'nonCompliant' and managedDeviceOwnerType eq 'company'"
+  $response = (Invoke-MgGraphRequest -Method GET -Uri $uri).value
+  
+  $allNoCompliance = @()
+  foreach ($device in $response){
+    $noCompliance = [PSCustomObject]@{
+      intuneId = $device.ID
+      userDisplayName = $device.userDisplayName
+      deviceName = $device.deviceName
+    }
+    $allNoCompliance += $noCompliance
+  }
+  return $allNoCompliance
+}
+
+function GetCompliancesPerDevice {
+  param (
+    $allNoCompliance
+  )
+  #loop all non compliance devices for non compliance policy
+  foreach ($device in $allNoCompliance) {
+    $noComplianceState = @()
+    $intuneId = $device.intuneId
+    $userDisplayName = $device.userDisplayName
+    $deviceName = $device.deviceName
+
+    #Device exclude like AVD devices
+    if ($deviceName -eq "INTRA-AVD-*" -or $deviceName -eq "intra-avd-*"){
+      write-host "AVM"
+      break
+    }
+
+    $uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices/$intuneId/deviceCompliancePolicyStates"
+    $response = (Invoke-MgGraphRequest -Method GET -Uri $uri).value
+    
+    #first loop checking the compliance state per Main policy
+    foreach ($mainPolicy in $response) {
+      $compliancestate = $mainPolicy.state
+      $policyid = $mainPolicy.id
+      if ($compliancestate -ne "compliant") { 
+
+        $uriMP = "https://graph.microsoft.com/beta/deviceManagement/managedDevices/$intuneId/deviceCompliancePolicyStates/$policyid/settingStates"
+        $nonMaincompliance = (Invoke-MgGraphRequest -Uri $uriMP -Method Get -OutputType PSObject).value
+
+        #second loop checking the compliance state per subpolicy
+        foreach ($policy in $nonMaincompliance){
+          $compliancestatesubpolicy = $policy.state
+          if ($compliancestatesubpolicy -ne "compliant"){
+            $PolicyName = $policy.setting.Split(".")
+            $collectNonCompliance = [PSCustomObject]@{
+              userName1 = $policy.userPrincipalName
+              UsernameDevice = $userDisplayName
+              policyName = $PolicyName[0]
+              policySubName = $PolicyName[-1]
+              DeviceName = $deviceName
+              intuneID = $intuneId
+            }
+          $noComplianceState += $collectNonCompliance
+          }
+        }
+      }
+    }
+  }
+  return $noComplianceState
+}
+
+#Connect-MgGraph
+$allNoCompliance = GetAllNonComplianceDevices
+
+$noComplianceState = GetCompliancesPerDevice -allNoCompliance $allNoCompliance
+$noComplianceState
+
+#DisConnect-MgGraph
