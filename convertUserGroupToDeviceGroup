@@ -1,0 +1,87 @@
+<#
+Beta
+convert dynamic/static user group to static device group
+
+log:
+Made working script: 13/01/2025 
+#>
+
+connect-mggraph
+
+#ophalen alle members van een groep
+function GetMembersGroup {
+    param (
+        $groupIdUsers
+    )
+    $listMembersGroup = @()
+
+    $filterGroup = "?`$select=userPrincipalName"
+    $uriGroup = "https://graph.microsoft.com/v1.0/groups/$groupId/members$filterGroup"
+    #write-host $uriGroup
+
+    $responseGroup = (Invoke-MgGraphRequest -Uri $uriGroup).value
+
+    foreach ($Upn in $responseGroup){
+        $listMembersGroup += $upn.userPrincipalName
+    }
+
+    return $listMembersGroup
+}
+#ophalen van alle devices van een groep 
+#need to get the id of the device not intune Device ID or Microsoft Entra Device ID so an coexcist way is via ... ownedDevices ...
+function GetDevicesGroup {
+    param (
+        $allMembersGroup
+    )
+    $listDevices = @()
+
+    foreach ($upn in $allMembersGroup){
+        $filterDevice = "?`$select=id"
+        $uriDevice = "https://graph.microsoft.com/v1.0/users/$upn/ownedDevices$filterDevice"
+        #write-host $uriDevice
+
+        $responseDevice = (Invoke-MgGraphRequest -Uri $uriDevice).value
+        #write-host $responseDevice
+
+        foreach ($device in $responseDevice){
+            $listDevices += $device
+        }
+    }
+    return $listDevices
+
+    #looking for the id via intune device id
+
+}
+#devices toevoegen aan een nieuwe groep
+function PutDevicesInGroup {
+    param (
+        $allDevicesIds,
+        $groupIdDevices
+    )
+    foreach ($device in $allDevicesIds){
+        $deviceId = $device.id
+        #write-host $deviceId
+    
+        $uriDevice = "https://graph.microsoft.com/v1.0/groups/$groupIdDevices/members/`$ref"
+        $jsonGroup = @{  
+            "@odata.id" = "https://graph.microsoft.com/v1.0/devices/$deviceId"  
+        } | ConvertTo-Json
+   
+        Invoke-MgGraphRequest -Method POST -Uri $uriDevice -Body $jsonGroup -ContentType "application/json"
+        Write-Host "device with ID: $deviceId is added to the new group"
+    }
+}
+
+#ophalen alle members van een groep
+$groupIdUsers = '' ## 
+$allMembersGroup = GetMembersGroup -groupIdUsers $groupIdUsers
+#$allMembersGroup
+#ophalen van alle devices van een groep
+$allDevicesIds = GetDevicesGroup -allMembersGroup $allMembersGroup
+#$allDevicesIds
+#devices toevoegen aan een nieuwe groep
+$groupIdDevices = '' ##
+$final = PutDevicesInGroup -allDevicesIds $allDevicesIds -groupIdDevices $groupIdDevices
+$final
+
+disconnect-mggraph
