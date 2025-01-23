@@ -141,11 +141,11 @@ DoesGroupExist -groupId $groupIdDevices
 
 #retrieve all members from the group
 $allMembersGroup = GetMembersGroup -groupIdUsers $groupIdUsers
-$allMembersGroup
+#$allMembersGroup
 
 #retrieve all Devices from the user group
 $allDevicesIds = GetDevicesGroup -allMembersGroup $allMembersGroup
-$allDevicesIds
+#$allDevicesIds
 
 #add devices to the device group
 PutDevicesInGroup -allDevicesIds $allDevicesIds -groupIdDevices $groupIdDevices
