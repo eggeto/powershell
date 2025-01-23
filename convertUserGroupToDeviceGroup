@@ -37,7 +37,6 @@ function GetMembersGroup {
 }
 #retrieve all Devices from the user group
 #need to get the id of the device not intune Device ID or Microsoft Entra Device ID so an coexcist way is via ownedDevices (id)  but owned devices is not filterd
-#but with ownedDevices is not filtered there are also personal devices, old devices  ...
 #so another function to from https://graph.microsoft.com/v1.0/users/upn/manageddevices the devicename or ... to go to https://graph.microsoft.com/v1.0/devices/... or https://graph.microsoft.com/v1.0/users/upn/owneddevices to get the ID (needed to add device to a group)
 function GetDevicesGroup {
     param (
