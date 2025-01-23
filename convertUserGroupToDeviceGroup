@@ -5,6 +5,9 @@ convert dynamic/static user group to static device group
 .INPUTS
 group id from the user and device group
 
+.MODULE
+Microsoft.Graph.Authentication
+
 .MADE
 Eggeto
 
@@ -16,7 +19,7 @@ Made working script
 adding some checks, error catching + provide some more information about the users and devices
 #>
 
-#connect-mggraph
+connect-mggraph
 #retrieve all members from the group
 function GetMembersGroup {
     param (
@@ -149,5 +152,5 @@ $allDevicesIds = GetDevicesGroup -allMembersGroup $allMembersGroup
 #add devices to the device group
 PutDevicesInGroup -allDevicesIds $allDevicesIds -groupIdDevices $groupIdDevices
 
-#disconnect-mggraph
+disconnect-mggraph
 
