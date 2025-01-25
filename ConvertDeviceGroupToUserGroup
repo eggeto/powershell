@@ -16,7 +16,7 @@ log:
 made script
 #>
 
-#connect-mggraph
+connect-mggraph
 #retrieve all device members from the group
 function GetMembersGroup {
     param (
@@ -110,8 +110,9 @@ $allMembersGroup = GetMembersGroup -group $groupIdDevices
 
 #Get the user Id's 
 $allUserIds = GetUserId -allMembersGroup $allMembersGroup
-$allUserIds
+#$allUserIds
 
 #Add the users to the user group
 PutUserInGroup -allUserIds $allUserIds -groupIdUser $groupIdUser
-#disconnect-mggraph
+
+disconnect-mggraph
