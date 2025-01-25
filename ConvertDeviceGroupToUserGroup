@@ -1,0 +1,117 @@
+<#
+.SYNOPSIS
+convert a device group to a static user group
+
+.INPUTS
+group id from the user and device group
+
+.MODULE
+Microsoft.Graph.Authentication
+
+.MADE
+Eggeto
+
+log:
+25/01/2025
+made script
+#>
+
+#connect-mggraph
+#retrieve all device members from the group
+function GetMembersGroup {
+    param (
+        $groupId
+    )
+    $filter = "?`$select=id"
+    $uridevice = "https://graph.microsoft.com/v1.0/groups/$groupId/members$filter"
+    #$uridevice
+
+    $deviceResponse = (Invoke-MgGraphRequest -Method GET -Uri $uridevice).value
+
+    $listDeviceId = @()
+    foreach ($device in $deviceResponse){
+        $deviceId = $device.id
+        $listDeviceId += $deviceId
+    }
+    #Write-Host $listDeviceId
+    return $listDeviceId
+}
+#retrieve all users (registered Owners) from the Device group
+function GetUserId {
+    param (
+        $allMembersGroup
+    )
+    $listUserId = @()
+
+    foreach ($deviceId in $allMembersGroup){
+        #Write-Host $deviceId
+        $filterUser = "?`$select=id,mail"
+        $uriUserId = "https://graph.microsoft.com/v1.0/devices/$deviceId/registeredOwners$filterUser"
+
+        $userResponse = (Invoke-MgGraphRequest -Method GET -Uri $uriUserId).value
+        #Write-Host $userResponse
+        $userMail = $userResponse.mail
+        Write-Host "User: $userMail is added to the user group" -ForegroundColor Green
+        $listUserId += $userResponse.id
+    }
+    return $listUserId
+}
+#add User to the user group
+function PutUserInGroup {
+    param (
+        $allUserIds,
+        $groupIdUser
+    )
+    #write-host $allDevicesIds
+    foreach ($userId in $allUserIds){
+        try {
+            $uriGroup = "https://graph.microsoft.com/v1.0/groups/$groupIdUser/members/`$ref"
+            $jsonGroup = @{  
+                "@odata.id" = "https://graph.microsoft.com/v1.0/users/$userId"  
+            } | ConvertTo-Json
+       
+            Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json"
+            Write-Host "user with ID: $userId is added to the new group" 
+        }
+        catch {
+            "An error occurred."
+        }
+    }
+}
+#check if group exsist
+function DoesGroupExist {
+    param (
+        $groupId
+    )
+    $uri = "https://graph.microsoft.com/v1.0/groups/$groupId"
+    Invoke-MgGraphRequest -Method Get -Uri $uri -StatusCodeVariable "status"
+
+    if ($status -eq 200){
+        write-host "Group exist" -ForegroundColor Green
+    }
+    #if there is an status 400 or ..., statuscodevariable does not catch it, to investigate ... working with try and catch!
+    elseif ($status -eq 400) {
+        write-host "Group does not exist" -ForegroundColor Red
+    }
+    else{
+        write-host "Group does not exist $status" -ForegroundColor Red
+    }
+}
+
+#the running part
+$groupIdDevices = Read-Host "Enter the DEVICE security group ID"
+DoesGroupExist -groupId $groupIdDevices
+$groupIdUsers = Read-Host "Enter the USER security group ID"
+DoesGroupExist -groupId $groupIdUsers
+
+#Get all members from the device group
+$allMembersGroup = GetMembersGroup -group $groupIdDevices
+#$allMembersGroup
+
+#Get the user Id's 
+$allUserIds = GetUserId -allMembersGroup $allMembersGroup
+$allUserIds
+
+#Add the users to the user group
+PutUserInGroup -allUserIds $allUserIds -groupIdUser $groupIdUser
+#disconnect-mggraph
