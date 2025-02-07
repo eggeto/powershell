@@ -1,0 +1,88 @@
+<#
+!!!!!!!!!!!!!!work in progress!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!! right now, works only for user or device added/deleted from a specific group!!!!!!!!!!!!!!
+returns type (user/device) : name (devicename / usermail ) is added / deleted from group
+
+get recent changes made to a certan group using delta
+delta returns an entra id,
+there is no pattern to identify if the id is a user, group, device ...
+with directoryObject we try do identifie the id
+with delta there is no date available when a item is added or deleted
+the usable info for me is: id (group id), displayname (name from the group) and members (users added or delted)
+
+#when an item is removed
+@odata.type                    #microsoft.graph.device
+id                             xxxxxxxxxxxxxxxxxxxxxxxxx
+@removed                       {[reason, deleted]}
+when an items is added
+@odata.type                    #microsoft.graph.user
+id                             xxxxxxxxxxxxxxxxxxxxxxxxx
+
+both user and device use displayName => can't use displayName unless i add something specifiek for a device, i choose "model"
+#>
+
+Connect-MgGraph
+
+function TryToGetItemInfo {
+    param (
+        $changeId
+    )
+    $informationItem = @{}
+    try {
+        $uriDevice = "https://graph.microsoft.com/v1.0/directoryObjects/$changeId"
+        $response = Invoke-MgGraphRequest -Method GET -Uri $uriDevice -StatusCodeVariable "status"
+        $model = $response.model
+        $deviceName = $response.displayName
+        $userMail = $response.Mail
+        if ($null -ne $deviceName -and $null -ne $model){
+            $informationItem["Device"] += $deviceName
+            return $informationItem
+        }
+        elseif ($null -ne $userMail) {
+            $informationItem["User"] += $userMail
+            return $informationItem
+        }
+    }
+    catch {
+        write-host "the id: $changeId is not found"
+    }
+}
+
+
+$filter = "?`$select=id,displayName,members"
+$uri = "https://graph.microsoft.com/v1.0/groups/delta$filter"
+
+$response = (Invoke-MgGraphRequest -Method GET -uri $uri).value
+#the id from the group you want to see the changes made
+$groupîd = "" #enter the id from the group you want to review changes
+
+foreach ($item in $response){
+    $id = $item.id
+    if ($id -eq $groupîd){
+        $allChanges = $item.'members@delta'
+        if ($allChanges -isnot [system.array]) {
+            $allChanges = @($allChanges)
+            }
+        #$allChanges
+        #$allChanges[-1]
+        foreach ($change in $allchanges){
+            $changeId = $change.id
+            $whatKindOf = TryToGetItemInfo -changeId $changeId
+            $whatKindOf
+            $kindOf = $whatKindOf.Keys
+            $name = $whatKindOf.Values
+            #$change
+            #$change.'@removed'
+
+            if ($null -eq $change.'@removed'){
+                Write-Host "$kindOf : $name is added to the group"
+            }
+            else {
+                Write-Host "$kindOf : $name is deleted from the group"
+            }
+        }
+    }
+}
+
+Disconnect-MgGraph
