@@ -147,3 +147,29 @@ else {
     $infromationOneGroup
 }
 Disconnect-MgGraph
+
+
+<#
+
+#return information about a deleted user
+function InformationDeletedUser {
+    param (
+        $userId
+    )
+    $filter = "?`$select=displayName,jobTitle"
+    $uriDeletedUser = "https://graph.microsoft.com/v1.0/directory/deletedItems/$userId$filter"
+    $response = Invoke-MgGraphRequest -Method GET -uri $uriDeletedUser
+    $response
+
+    
+}
+
+$filter = "?`$select=id,mail"
+$uriUsers = "https://graph.microsoft.com/v1.0/users/delta$filter"
+$response = (Invoke-MgGraphRequest -Method GET -uri $uriUsers).value
+
+https://graph.microsoft.com/v1.0/devices/delta
+https://graph.microsoft.com/v1.0/users/delta > from removed users you can't get the name only the id > https://graph.microsoft.com/v1.0/directory/deletedItems/id no date available
+https://graph.microsoft.com/v1.0/applications/microsoft.graph.delta() > displayname, createdatetime
+
+#>
