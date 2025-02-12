@@ -92,7 +92,7 @@ function GetInformationAboutAgroup {
 
     foreach ($item in $response){
         $id = $item.id
-        if ($id -eq $groupîd){
+        if ($id -eq $groupId){
             $allChanges = $item.'members@delta'
             if ($allChanges -isnot [system.array]) {
                 $allChanges = @($allChanges)
