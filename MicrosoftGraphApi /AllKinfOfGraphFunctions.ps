@@ -210,3 +210,483 @@ function ConvertLicenseIDToName {
     }
     return $listNonActiveUserWithLicenseName
 }
+
+
+<#
+add Device to group
+#>
+
+function FunctionAddDeviceToGroup {
+  param (
+    $groupId,
+    $deviceId #uitzoeken azure of intune
+    )
+  $uriDevice = "https://graph.microsoft.com/v1.0/groups/$groupId/members/`$ref"
+
+  $jsonGroup = @{  
+    "@odata.id" = "https://graph.microsoft.com/v1.0/devices/$deviceId"  
+  } | ConvertTo-Json
+      
+  Invoke-MgGraphRequest -Method POST -Uri $uriDevice -Body $jsonGroup -ContentType "application/json"
+}
+
+
+<#
+adding user to teams channel as member
+https://learn.microsoft.com/en-us/graph/api/team-post-members?view=graph-rest-1.0&tabs=http
+
+choose member/owner in json
+#>
+
+Connect-MgGraph
+
+function AddUserTeams {
+    param (
+        $userIdInformation,
+        $teamId,
+        $channelId
+    )
+    $uriTeams = "https://graph.microsoft.com/v1.0/teams/$teamId/members" #/channels/{$channelId}/members"
+    
+    $jsonTeam = @{
+        "@odata.type" = "#microsoft.graph.aadUserConversationMember"
+        "roles" = @("member")
+        "user@odata.bind" = "https://graph.microsoft.com/v1.0/users('$userIdInformation')"
+    } | ConvertTo-Json
+    
+    Invoke-MgGraphRequest -Method POST -Uri $uriTeams -Body $jsonTeam -ContentType "application/json"
+}
+
+
+<#
+Get Device(s) id(s) from user
+#>
+
+connect-mggraph
+function GetUserDeviceInformation {
+    param (
+        $userInformation #userId!!!!!
+    )
+    $uriDevice = "https://graph.microsoft.com/v1.0/users/$userInformation/managedDevices"
+
+    $responseDevice = (Invoke-MgGraphRequest -Method Get -uri $uriDevice).value
+
+    [PSCustomObject][ordered]@{
+        intuneDeviceId      = $responseDevice.Id
+        azureAdDeviceId     = $responseDevice.azureAdDeviceId
+        deviceName          = $responseDevice.deviceName   
+    }
+}
+
+$userInformation = "UserId"
+
+$test = GetUserDeviceInformation -userInformation $userInformation
+$test.intuneDeviceId
+$test.azureAdDeviceID
+$test.deviceName
+
+
+
+function GetUserId {
+    param (
+        $userInformation
+    )
+    $uriUser = "https://graph.microsoft.com/v1.0/users/$userInformation"
+    $responseUser = Invoke-MgGraphRequest -Method Get -uri $uriUser
+
+    [PSCustomObject][ordered]@{
+        userId      = $responseUser.Id
+        userEmail   = $responseUser.mail
+    }
+    #return $responseUser
+}
+
+$userIdTest
+$test = GetUserId -userInformation $userIdTest
+$test.userEmail
+
+
+
+<#
+add Device to group
+#>
+
+function FunctionAddDeviceToGroup {
+  param (
+    $groupId,
+    $deviceId #uitzoeken azure of intune
+    )
+  $uriDevice = "https://graph.microsoft.com/v1.0/groups/$groupId/members/`$ref"
+
+  $jsonGroup = @{  
+    "@odata.id" = "https://graph.microsoft.com/v1.0/devices/$deviceId"  
+  } | ConvertTo-Json
+      
+  Invoke-MgGraphRequest -Method POST -Uri $uriDevice -Body $jsonGroup -ContentType "application/json"
+}
+
+
+
+
+<#
+Made by: Eggeto
+
+Add a user to a group function
+
+logs:
+Jul 17, 2024
+creating basic function
+
+Aug 26, 2024
+Adding troubleshooting + fine tuning + function give some feedback
+#>
+
+#Aug 26, 2024 version
+function AddUserToGroup {
+    param (
+        [string]$groupId,
+        [string]$userID
+    )
+    #Finding group info
+    $uriGroup = "https://graph.microsoft.com/v1.0/groups/$groupId"
+    $groupName = Invoke-MgGraphRequest -Method GET -Uri $uriGroup -ErrorAction SilentlyContinue
+    $groupName = $groupName.displayName
+
+    #Checking if user is already member of the group
+    $uriUser = "$uriGroup/members" 
+    $checkUser = (Invoke-MgGraphRequest -Method GET -Uri $uriUser -ErrorAction SilentlyContinue).value
+
+    if ($userId -like $checkUser.id){
+        return "user: $($checkUser.mail) is already member of group: $groupName"
+    }
+
+    #adding user to group
+    $uriGroup =  "$uriUser/`$ref" 
+
+    $jsonGroup = 
+    @{
+        "@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$userId"
+    } | convertTo-Json
+    # "@odata.id": "https://graph.microsoft.com/v1.0/users/{$userIdTest}" works also!
+
+    Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json" -StatusCodeVariable "status"
+    if ($status -eq "204"){
+        return "Added user: $($checkUser.mail) to group: $groupName"
+    }
+    else{
+        return "something went wrong HTTP status code: $status"
+    }
+}
+
+#or the basic function (Jul 17, 2024)
+
+function AddUserToGroup {
+    param (
+        $groupId,
+        $userID
+    )
+    #https://learn.microsoft.com/en-us/graph/api/group-post-members?view=graph-rest-1.0&tabs=http
+    #`$ref escaping ` $ref!!!!
+    $uriGroup =  "https://graph.microsoft.com/v1.0/groups/{$groupId}/members/`$ref" 
+
+        $jsonGroup = 
+    @{
+        "@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$userId"
+    } | convertTo-Json
+
+#    "@odata.id": "https://graph.microsoft.com/v1.0/users/{$userIdTest}" works also!
+
+    Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json" -ErrorAction SilentlyContinue
+}
+
+
+$groupIdTest = ""
+$userIdTest = ""
+$test = AddUserToGroup -groupId $groupIdTest -userID $userIdTest
+$test
+
+
+
+
+<#
+adding license 
+
+Need License SkuId !!
+
+[ordered] added to json other wise the order was not correct!
+ #is not converting correctly ==> "" instead of []
+ werken met [pscustomobject] en depth
+ $test = $jsonLicense | ConvertTo-Json -Depth 5
+
+$lisenceSkuE3 = "05e9a617-0261-4cee-bb44-138d3ef5d965"
+$lisenceSkuTeams = "e43b5b99-8dfb-405f-9987-dc307f34bcbd"
+
+https://jeffbrown.tech/going-deep-converting-powershell-objects-to-json/
+#>
+
+Connect-MgGraph -scope User.ReadWrite.All, Directory.ReadWrite.All
+
+
+function AddLicenseToUser {
+    param (
+        $LicenseId,
+        $userId
+    )
+    $jsonLicense = [PSCustomObject][ordered]@{
+        "addLicenses" = @(
+            @{
+                "disabledPlans" = @()
+                "skuId" = $licenseId
+            }
+        )
+        "removeLicenses" = @()
+        } | ConvertTo-Json -Depth 5
+
+
+    $uriLicense = "https://graph.microsoft.com/v1.0/users/{$userId}/microsoft.graph.assignLicense" #!!!!!!!!!!!!!!!!!!moet Object ID worden ipv userprincipalname!!!!!!!!!!!!!!!!!!!!!!
+
+    Invoke-MgGraphRequest -Method POST -Uri $uriLicense -Body $jsonLicense -ContentType "application/json"
+}
+
+$lisenceId = ""
+$userId = ""
+$test = AddLicenseToUser -LicenseId $lisenceId -userId $userId
+$test
+
+
+<#
+Bloody H*ll fieu datetime format :-)
+if you get an 400 error check the $uri!!!
+should be simular as below
+#$uri1 = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices?`$filter=enrolledDateTime ge 2023-12-11T21:17Z and enrolledDateTime le 2024-08-17T20:17Z" #this works
+do not add [datetime] to the param!!!! it will mess up the time values
+
+logs
+16/08/2024
+creating function
+17/08/2024
+fine tuning
+#>
+
+function GetAllNewDevices {
+    param(
+        $startDate,
+        $endDate
+    )
+    
+    $startDate = $startDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mmZ')
+    $endDate = $endDate.ToUniversalTime().ToString('yyyy-MM-ddTHH:mmZ')
+
+    $filter = "`$filter=enrolledDateTime ge $startDate" # and enrolledDateTime le $endDate" => if you want devices between a certain date uncommand $enddate
+    $uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices?$filter"
+    write-host $uri
+
+    $devices = (Invoke-MgGraphRequest -Method GET -uri $uri).value
+
+    return $devices
+}
+
+connect-MgGraph
+
+$startDate = (Get-Date).AddDays(-250) #days before the start date
+#$endDate = Get-Date
+
+$newDevices = GetAllNewDevices -startDate $startDate -endDate $endDate
+
+foreach ($device in $newDevices){
+    write-host $device.deviceName
+}
+
+<#
+functionGetUserIdMail
+#>
+
+function GetUserId {
+    param (
+        $userInformation
+    )
+    $uriUser = "https://graph.microsoft.com/v1.0/users/$userInformation"
+    $responseUser = Invoke-MgGraphRequest -Method Get -uri $uriUser
+
+    [PSCustomObject][ordered]@{
+        userId      = $responseUser.Id
+        userEmail   = $responseUser.mail
+    }
+    #return $responseUser
+}
+
+$userIdTest
+$test = GetUserId -userInformation $userIdTest
+$test.userEmail
+
+
+<#
+add Device to group
+#>
+
+function FunctionAddDeviceToGroup {
+  param (
+    $groupId,
+    $deviceId #uitzoeken azure of intune
+    )
+  $uriDevice = "https://graph.microsoft.com/v1.0/groups/$groupId/members/`$ref"
+
+  $jsonGroup = @{  
+    "@odata.id" = "https://graph.microsoft.com/v1.0/devices/$deviceId"  
+  } | ConvertTo-Json
+      
+  Invoke-MgGraphRequest -Method POST -Uri $uriDevice -Body $jsonGroup -ContentType "application/json"
+}
+
+
+<#
+Made by: Eggeto
+
+Add a user to a group function
+
+logs:
+Jul 17, 2024
+creating basic function
+
+Aug 26, 2024
+Adding troubleshooting + fine tuning + function give some feedback
+#>
+
+#Aug 26, 2024 version
+function AddUserToGroup {
+    param (
+        [string]$groupId,
+        [string]$userID
+    )
+    #Finding group info
+    $uriGroup = "https://graph.microsoft.com/v1.0/groups/$groupId"
+    $groupName = Invoke-MgGraphRequest -Method GET -Uri $uriGroup -ErrorAction SilentlyContinue
+    $groupName = $groupName.displayName
+
+    #Checking if user is already member of the group
+    $uriUser = "$uriGroup/members" 
+    $checkUser = (Invoke-MgGraphRequest -Method GET -Uri $uriUser -ErrorAction SilentlyContinue).value
+
+    if ($userId -like $checkUser.id){
+        return "user: $($checkUser.mail) is already member of group: $groupName"
+    }
+
+    #adding user to group
+    $uriGroup =  "$uriUser/`$ref" 
+
+    $jsonGroup = 
+    @{
+        "@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$userId"
+    } | convertTo-Json
+    # "@odata.id": "https://graph.microsoft.com/v1.0/users/{$userIdTest}" works also!
+
+    Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json" -StatusCodeVariable "status"
+    if ($status -eq "204"){
+        return "Added user: $($checkUser.mail) to group: $groupName"
+    }
+    else{
+        return "something went wrong HTTP status code: $status"
+    }
+}
+
+#or the basic function (Jul 17, 2024)
+
+function AddUserToGroup {
+    param (
+        $groupId,
+        $userID
+    )
+    #https://learn.microsoft.com/en-us/graph/api/group-post-members?view=graph-rest-1.0&tabs=http
+    #`$ref escaping ` $ref!!!!
+    $uriGroup =  "https://graph.microsoft.com/v1.0/groups/{$groupId}/members/`$ref" 
+
+        $jsonGroup = 
+    @{
+        "@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$userId"
+    } | convertTo-Json
+
+#    "@odata.id": "https://graph.microsoft.com/v1.0/users/{$userIdTest}" works also!
+
+    Invoke-MgGraphRequest -Method POST -Uri $uriGroup -Body $jsonGroup -ContentType "application/json" -ErrorAction SilentlyContinue
+}
+
+
+$groupIdTest = ""
+$userIdTest = ""
+$test = AddUserToGroup -groupId $groupIdTest -userID $userIdTest
+$test
+
+
+<#
+adding license 
+
+Need License SkuId !!
+
+[ordered] added to json other wise the order was not correct!
+ #is not converting correctly ==> "" instead of []
+ werken met [pscustomobject] en depth
+ $test = $jsonLicense | ConvertTo-Json -Depth 5
+
+$lisenceSkuE3 = "05e9a617-0261-4cee-bb44-138d3ef5d965"
+$lisenceSkuTeams = "e43b5b99-8dfb-405f-9987-dc307f34bcbd"
+
+https://jeffbrown.tech/going-deep-converting-powershell-objects-to-json/
+#>
+
+Connect-MgGraph -scope User.ReadWrite.All, Directory.ReadWrite.All
+
+
+function AddLicenseToUser {
+    param (
+        $LicenseId,
+        $userId
+    )
+    $jsonLicense = [PSCustomObject][ordered]@{
+        "addLicenses" = @(
+            @{
+                "disabledPlans" = @()
+                "skuId" = $licenseId
+            }
+        )
+        "removeLicenses" = @()
+        } | ConvertTo-Json -Depth 5
+
+
+    $uriLicense = "https://graph.microsoft.com/v1.0/users/{$userId}/microsoft.graph.assignLicense" #!!!!!!!!!!!!!!!!!!moet Object ID worden ipv userprincipalname!!!!!!!!!!!!!!!!!!!!!!
+
+    Invoke-MgGraphRequest -Method POST -Uri $uriLicense -Body $jsonLicense -ContentType "application/json"
+}
+
+$lisenceId = ""
+$userId = ""
+$test = AddLicenseToUser -LicenseId $lisenceId -userId $userId
+$test
+
+<#
+Get Device(s) id(s) from user
+#>
+
+connect-mggraph
+function GetUserDeviceInformation {
+    param (
+        $userInformation #userId!!!!!
+    )
+    $uriDevice = "https://graph.microsoft.com/v1.0/users/$userInformation/managedDevices"
+
+    $responseDevice = (Invoke-MgGraphRequest -Method Get -uri $uriDevice).value
+
+    [PSCustomObject][ordered]@{
+        intuneDeviceId      = $responseDevice.Id
+        azureAdDeviceId     = $responseDevice.azureAdDeviceId
+        deviceName          = $responseDevice.deviceName   
+    }
+}
+
+$userInformation = "UserId"
+
+$test = GetUserDeviceInformation -userInformation $userInformation
+$test.intuneDeviceId
+$test.azureAdDeviceID
+$test.deviceName
+
+Disconnect-MgGraph
