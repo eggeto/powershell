@@ -1,1 +1,212 @@
+<#
 
+
+log:
+made on 30/03/2024
+
+to do
+pagination
+filter free license out
+#>
+
+
+#Get all non active users - input = read host or standard =  100 days - output return a list with powershell objects containing userprincipalename/mail +  userid // to do pagination
+function GetNonActiveUsers {
+    param (
+        
+    )
+    $nonActiveUsers = @()
+    <#
+    signInActivity  contains follow information:
+                    "lastSignInDateTime":
+                    "lastSignInRequestId":
+                    "lastNonInteractiveSignInDateTime": 
+                    "lastNonInteractiveSignInRequestId": 
+                    "lastSuccessfulSignInDateTime":             
+                    "lastSuccessfulSignInRequestId":
+    #>
+    $filterUsers = "?`$select=signInActivity,mail,id,userPrincipalName&"#`$top=999"
+    $allUsersUri = "https://graph.microsoft.com/v1.0/users$filterUsers"
+    $AllUsersResponse = (Invoke-MgGraphRequest -Method GET -Uri $allUsersUri).value
+    #if there is one item make it an array > so the loop will work
+    if ($AllUsersResponse -isnot [system.array]) {
+        $AllUsersResponse = @($AllUsersResponse)
+    }
+    #if you don't give up X days, the standard will be 100 days
+    $days = Read-Host "How many days for last login"
+    if ($days -eq "") {
+        $days = 100
+    }
+    foreach ($user in $AllUsersResponse) {
+        $userId = $user.id
+        $userMail = $user.userPrincipalName                     #check the result, you can choose between mail or userPrincipalName
+        $lastSignInDateTime = $user.signInActivity.lastSignInDateTime
+        <#
+        if ($null -eq $lastSignInDateTime){
+            write-host "there is no sign in information available for $userMail"
+        }
+        #$lastsignindate
+        #>
+        $signInDate = $lastSignInDateTime -as [datetime]
+        if (-not $signInDate -or ([datetime]::UtcNow - $signInDate).TotalDays -gt $days) {
+        #if ([string]::IsNullOrEmpty($lastsignin) -or ([datetime]::UtcNow - [datetime]$lastsignin).TotalDays -gt $days) {
+            $userInfo = [pscustomobject]@{
+                mail = $userMail
+                userId = $userId
+            }
+            $nonActiveUsers += $userInfo
+            #write-host "$userMail has not been seen for: $days days or more / the user never logged in" #
+        }
+    }
+    return $nonActiveUsers
+}
+
+#Get all disabled Users - no input requiret - output return a list with powershell objects containing userprincipalename/mail +  userid // to do pagination
+function GetDisabledUsers{
+    param (
+
+    )
+    $disabledUsers = @()
+    $filter = "?`$select=accountEnabled,userPrincipalName,Id&`$filter=accountEnabled eq false"
+    $uriDisabledUsers = "https://graph.microsoft.com/v1.0/users$filter"
+
+    $responseDisabledUsers = (Invoke-MgGraphRequest -Method GET -Uri $uriDisabledUsers).value
+    #if there is one item make it an array > so the loop will work
+    if ($responseDisabledUsers -isnot [system.array]) {
+        $responseDisabledUsers = @($responseDisabledUsers)
+    }
+
+    foreach ($user in $responseDisabledUsers) {
+        #$accountEnabled = $user.accountEnabled
+        #if (-not ($accountEnabled)){ # can scip this by using a filter
+            $userId = $user.id
+            $userMail = $user.userPrincipalName                     #check the result, you can choose between mail or userPrincipalName
+            $userInfo = [pscustomobject]@{
+                    mail = $userMail
+                    userId = $userId
+            }
+            $disabledUsers += $userInfo
+       # }
+    }
+    return $disabledUsers
+}
+
+# check if  users  have a license / input directory/hash with userid and usermail / output list with powershell object(userid, mail, licenseId) for licened users or list with powershell object(userid, mail) for non licend users
+function GetUserLisenceID {
+    param (
+        $allInputUsers
+    )
+    $listLicenseUsers = @()
+    $listNonLicendUsers = @()
+    foreach ($user in $allInputUsers) {
+        $listLicensesId = @()
+        #$userId = $user.userId
+        $userMail = $user.mail
+        $licenseUricheck = "https://graph.microsoft.com/v1.0/users/$userId/licenseDetails"
+        $userLicense = (Invoke-MgGraphRequest -Method GET -Uri $licenseuricheck).value
+        #if there is one item make it an array > so the loop will work
+        if ($userLicense -isnot [system.array]) {
+            $userLicense = @($userLicense)
+        }
+        if ($userLicense.Count -gt 0) {
+            #write-host "$userMail has a license assigned" -ForegroundColor Green
+            foreach ($license in $userlicense) {
+                $guid = $license.skuId
+                $listLicensesId += $guid
+            }
+            $userInfoLicense = [pscustomobject]@{
+                #userId = $userId
+                mail = $userMail
+                license = $listLicensesId
+            }
+            $listLicenseUsers += $userInfoLicense
+        }
+        else {
+            $userInfoNonLicense = [pscustomobject]@{
+                #userId = $userId
+                mail = $userMail
+            }
+            $listNonLicendUsers += $userInfoNonLicense
+            #Write-Host "$userMail has no license assigned"
+        }
+    }
+    #write-host " users with a license" -ForegroundColor Green
+    return $listLicenseUsers
+    #write-host "users without a license" -ForegroundColor Cyan
+    #return $listNonLicendUsers
+}
+
+#Get the displayname and the skuid from all the license in your tenant  output list with  hash tables key = skuid value = Pretty Name License
+function GetNameLicense {
+    param (
+    )
+    #get all the microsoft license information !!!!microsft can change this link!!!!!!!!
+    $microsoftLicenseUri = "https://download.microsoft.com/download/e/3/e/e3e9faf2-f28b-490a-9ada-c6089a1fc5b0/Product%20names%20and%20service%20plan%20identifiers%20for%20licensing.csv" 
+    $microsoftLicenseOverview = Invoke-RestMethod -Method Get -Uri $microsoftLicenseUri| ConvertFrom-Csv
+    #$microsoftLicenseOverview
+
+    #Sort the info from all microsft licenses in a hash table key = guid, value = product display name
+    $skuinformation = @{}
+    foreach ($item in $microsoftLicenseOverview) {
+        $skuinformation[$item.GUID] = $item.'Product_Display_Name'
+    }
+
+    #Get  license information from my tenant (id)
+    $uriLicense = "https://graph.microsoft.com/v1.0/subscribedSkus"
+    $licensesResponse = (Invoke-MgGraphRequest -Method GET -Uri $uriLicense).value
+    #$licensesResponse
+
+    #Get the dispalyname from the license id
+    $listTenantLicenses = @()
+    foreach ($license in $licensesResponse) {
+        $tenantLinceses = @{}
+        #$skuNamePretty = ($microsoftLicenseOverview | Where-Object {$_.GUID -eq $license.skuId} | Sort-Object Product_Display_Name -Unique)."ï»¿Product_Display_Name"
+        #$skuNamePretty = $skuinformation[$license.skuId]
+        if ($skuinformation.ContainsKey($license.skuId)){
+            <#
+            if (-not $skuNamePretty -or $skuNamePretty -match "free|trial") {
+                continue # Skip free/trial licenses early
+            }
+            $licenseId = $license.skuId
+            $displayname = $skuinformation[$license.skuId]
+            $tenantLinceses[$licenseId] = $displayname
+            #>
+            
+            $tenantLinceses = [pscustomobject]@{
+                displayname = $skuinformation[$license.skuId]
+                skuId = $license.skuId
+            }
+        }
+        $listTenantLicenses += $tenantLinceses
+    }
+    return $listTenantLicenses
+}
+
+#convert license Id to a licenseName only if the license is in your tenant!! 
+#input list of users and - output 
+function ConvertLicenseIDToName {
+    param (
+        $nonActiveWithLicense,
+        $listCompanyLicense
+    )
+    $listNonActiveUserWithLicenseName = @()
+    foreach ($userItem in $nonActiveWithLicense) {
+        $userMail = $userItem.mail
+        $listSkuId = $userItem.license
+        $listLicenseName = @()
+        foreach ($userLicense in $listSkuId) {
+            foreach ($companyLicense in $listCompanyLicense){
+                if ($userLicense -eq $companyLicense.skuId){
+                    $licenseName = $companyLicense.displayname
+                    $listLicenseName += $licenseName
+                }
+            }
+        }
+        $test = [pscustomobject]@{ # inspiratie is op voor variable namen
+            allNamedLicenseUser = $listLicenseName
+            userEmail = $userMail
+        }
+        $listNonActiveUserWithLicenseName += $test
+    }
+    return $listNonActiveUserWithLicenseName
+}
