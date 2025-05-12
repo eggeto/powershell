@@ -8,7 +8,7 @@ function LocateDevice {
 	)
 	$deviceId = GetDeviceId -deviceInfo $deviceName
 	write-host "the device id is: $deviceId"
-	$uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices/$deviceId" #dc4878b8-c9f4-423b-a68f-49218d6ead83"
+	$uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices/$deviceId" 
 	$response = Invoke-MgGraphRequest -Method GET -uri $uri
 	$isLocationKnown = $response.deviceActionResults.deviceLocation
 	If($isLocationKnown -ne $null){
