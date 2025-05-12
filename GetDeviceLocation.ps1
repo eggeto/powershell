@@ -12,8 +12,8 @@ function LocateDevice {
 	$response = Invoke-MgGraphRequest -Method GET -uri $uri
 	$isLocationKnown = $response.deviceActionResults.deviceLocation
 	If($null -ne $isLocationKnown){
-		$Latitude = $response.deviceActionResults.deviceLocation.latitude
-		$Longitude = $response.deviceActionResults.deviceLocation.longitude
+		$Latitude = $isLocationKnownn.latitude
+		$Longitude = $isLocationKnown.longitude
 		write-host "Latitude: $Latitude, Longitude: $Longitude"
 		#$uriGoogle = "https://www.google.com/maps?q=$Latitude,$Longitude"
 		#$locationGoogle = Invoke-WebRequest -Uri $uriGoogle -Method Get
