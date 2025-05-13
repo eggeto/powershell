@@ -33,7 +33,7 @@ function GetDeviceId {
 	$filter = "?`$filter=deviceName eq '$deviceInfo'"
 	$uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices$filter"
 	$response = (Invoke-MgGraphRequest -Method GET -uri $uri).value
-	return $response.id
+	return $response.id #intuneDeviceId
 }
 
 Connect-MgGraph
