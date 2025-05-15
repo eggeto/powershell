@@ -37,10 +37,13 @@ function LocateDevice {
 				#$locationGoogle = Invoke-WebRequest -Uri $uriGoogle -Method Get
 				#$locationGoogle
 				Start-Process "https://www.google.com/maps?q=$Latitude,$Longitude"
+				$toSync = $false
 				break
 			}
-			write-host "Nope, Nothing"
 		}
+		if ($toSync){
+			write-host "Nope, Nothing"
+		}	
 	}
 }
 
