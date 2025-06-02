@@ -69,6 +69,6 @@ function CountCompanyDevices { #i want every one with mor then 1 device
     } 
 }
 
-CountCompanyDevices -upn "email user"
+CountCompanyDevices -upn #<the email or UPN from 1 user or if you can add a loop>
 
 DisConnect-MgGraph
