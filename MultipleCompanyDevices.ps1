@@ -17,7 +17,7 @@
     Made by Eggeto
 #>
 
-Connect-MgGraph
+Connect-MgGraph -Scopes User.Read.All
 function IsCompanyDevice {
     param (
         $response    
