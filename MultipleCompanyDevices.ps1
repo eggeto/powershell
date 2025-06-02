@@ -1,6 +1,6 @@
 <# 
     .SYNOPSIS
-    Get the devices from users with more then 1 device
+    Get the Company devices from users with more then 1 device
 
     .DESCRIPTION
     For this script, you need to install the powershell mgraph module.
@@ -64,7 +64,7 @@ function CountCompanyDevices { #i want every one with mor then 1 device
         #return $arrayCompanyOwnedDevices
     }
     else {
-        write-host "$upn has no device"
+        write-host "$upn has 1 or null device"
         return $null
     } 
 }
