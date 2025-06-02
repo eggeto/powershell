@@ -20,6 +20,8 @@
 
     .logs
     made 02/06/2025
+    added a filter in function UsersWithMoreCompanyDevices,
+    no filter yet for function CountCompanyDevices, need to think about that
 
     .to do
     ask what the user preffer, number of devices, company or personal
@@ -82,7 +84,8 @@ function UsersWithMoreCompanyDevices {
     param (
         $groupId
     )
-    $uri = "https://graph.microsoft.com/v1.0/groups/$groupId/members"
+    $filter = "?`$select=mail"
+    $uri = "https://graph.microsoft.com/v1.0/groups/$groupId/members$filter"
     try {
         $response = (Invoke-MgGraphRequest -Method GET -Uri $uri -ErrorAction SilentlyContinue -StatusCodeVariable "status1").value
     }
