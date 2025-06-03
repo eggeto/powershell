@@ -89,8 +89,7 @@ function UsersWithMoreCompanyDevices {
         $response = (Invoke-MgGraphRequest -Method GET -Uri $uri -ErrorAction SilentlyContinue -StatusCodeVariable "status1").value
     }
     catch {
-        Write-Host "MAYDAY for $upn"
-        return "Error details: $($_.Exception.Message)"  
+        return "MAYDAY for $upn, Error details: $($_.Exception.Message)"  
     }
     $response = @($response)
     $userFromGroup = $response.mail #$response.userPrincipalName
