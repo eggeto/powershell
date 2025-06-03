@@ -75,8 +75,7 @@ function CountCompanyDevices { #i want every one with mor then 1 device
         #return $arrayCompanyOwnedDevices
     }
     else {
-        write-host "$upn has 1 or null device"
-        return $null
+        return $null, "$upn has 1 or null device"
     } 
 }
 #looping a user group
@@ -101,7 +100,7 @@ function UsersWithMoreCompanyDevices {
         $outputUser = CountCompanyDevices -upn "$user"
         $listUserDevice += $outputUser
     }
-    $listUserDevice
+    return $listUserDevice
 }
 
 $groupId = "YOUR GROUP ID"
