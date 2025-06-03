@@ -39,9 +39,9 @@ function IsCompanyDevice {
         if($device.managedDeviceOwnerType -contains "company"){
             $listCompanyOwnedDevices += $device
         }
-        else {
-            $listPersonalOwnedDevices += $device
-        }
+        #else {
+        #    $listPersonalOwnedDevices += $device
+        #}
     }  
     return $listCompanyOwnedDevices  
 }
@@ -74,9 +74,9 @@ function CountCompanyDevices { #i want every one with mor then 1 device
         #$arrayCompanyOwnedDevices[$upn] = $companyOwnedDevices.deviceName
         #return $arrayCompanyOwnedDevices
     }
-    else {
-        return $null, "$upn has 1 or null device"
-    } 
+    #else {
+    #    return $null, "$upn has 1 or null device"
+    #} 
 }
 #looping a user group
 function UsersWithMoreCompanyDevices {
