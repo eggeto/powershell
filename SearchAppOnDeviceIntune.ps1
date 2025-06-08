@@ -20,6 +20,9 @@ created Beta app
 
 aug 31 2024
 Version V1 finished
+
+08/06/2025
+update
 #>
 
 #connect to microsoft graph
