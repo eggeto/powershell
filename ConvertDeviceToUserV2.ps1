@@ -15,8 +15,8 @@ group id from the user and device group
 .OUTPUTS
 return an custom PSobject
 key = user email
-value =     true 
-        or  list with error information + false
+value =     true                                         (if user is added to the group)
+        or  list with error information + false          (if the user is NOT added to the group)
 
 .MODULE
 Microsoft.Graph.Authentication
