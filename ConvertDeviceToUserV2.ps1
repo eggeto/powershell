@@ -31,7 +31,7 @@ made script
 update output (psobject) + error info
 #>
 
-connect-mggraph
+connect-mggraph -Scopes Group.ReadWrite.All, GroupMember.Read.All
 #retrieve all device members from the group 
 function GetMembersGroup {
     param (
@@ -146,4 +146,4 @@ $allMembersGroup = GetMembersGroup -group $groupIdDevices
 #Get the user Id's from the devices + Add the users to the user security group
 GetUserId -allMembersGroup $allMembersGroup -groupIdUser $groupIdUser
 
-#disconnect-mggraph
+disconnect-mggraph
