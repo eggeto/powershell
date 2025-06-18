@@ -5,13 +5,14 @@ or convert a user group to a static device group
 
 .DESCRIPTION
 For this script, you need to install the powershell mggraph module.
-It will convert an Device security group to an static User group.
+It will convert an Device security group to an static User group
+or visa versa
 Both groups must exist,
 the script will NOT make the groups!
 If a device has no primary user, it will be excluded
 
 .INPUTS
-group name from the user and device group + 
+group name from the user and device group + type (read example)
 
 .OUTPUTS
 return an custom PSobject
@@ -20,8 +21,8 @@ value   = true
     or    false + list with error information
 
 .Example
-ConvertGroup -nameDeviceGroup -nameUserGroup -type devices  ==>> convert a group with only devices to a group with the primary users from the devices
-ConvertGroup -nameDeviceGroup -nameUserGroup -type users    ==>> convert a group with only users to a group with the devices the user is primary user from
+ConvertGroup -nameDeviceGroup "YOUR GROUP NAME" -nameUserGroup "YOUR GROUP NAME" -type devices  ==>> convert a group with only devices to a group with the primary users from the devices
+ConvertGroup -nameDeviceGroup "YOUR GROUP NAME" -nameUserGroup "YOUR GROUP NAME" -type users    ==>> convert a group with only users to a group with the devices the user is primary user from
 
 .MODULE
 Microsoft.Graph.Authentication
@@ -36,12 +37,12 @@ made script
 update output (psobject) + error info
 18/06/2025
 Modify the input and the running function,
-now you can convert a device grou pto a user group and a user group to a device group
-changed the name
+now you can convert a device group to a user group and a user group to a device group
+changed the name to ConvertAGroup
 
 TO DO:
 make an Module from it
-make it also the group id possible as input
+make also the group id possible as input
 #>
 
 connect-mggraph -Scopes Group.ReadWrite.All, GroupMember.Read.All
