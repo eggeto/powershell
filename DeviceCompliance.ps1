@@ -1,24 +1,27 @@
 <#
 .SYNOPSIS
-Get all the Not Compliant devices with info
+Get all the Not Compliant devices with info sorted per device
 
 .INPUTS
-optional blacklist => 
+Optional blacklist => $blacklist
 
 .OUTPUTS
-devicename with non compliant policy
+devicename with the follow:
+  Username => system account or User Principal Name,
+  Device Name
+  Main non compliant policy name,
+  Sub non complaint policy name
 
 .Auther
-Made by Eggeto
+Eggeto
   
 logs:
 25/11/2024 => made scipt 
 23/06/2025 => Modify functions for readability, added blacklist option
 
 To do
-different between system account and user account!!!!
 better naming
-blacklist =< add a group with devices
+blacklist => add a group with devices instead of a list
 ...
 on going
 #>
@@ -49,14 +52,16 @@ function GetAllNonComplianceDevices {
 }
 #blacklist via deviceName
 $blackList = @(
-  #device1,
-  #device2,
+  #"device1"
+  #"device2",
   #...
 )
 #first loop checking the compliance state per MAIN policy
 function FilterComplianceMain {
   param (
-    $intuneId
+    $intuneId,
+    $deviceName,
+    $userDisplayName
   )
   $filter = "?`$select=id,state,displayName"
   $uri = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices/$intuneId/deviceCompliancePolicyStates$filter"
@@ -66,47 +71,47 @@ function FilterComplianceMain {
   catch {
     return "MAYDAY, Error details: $($_.Exception.Message)"  
   }
-  $list = @()
-  foreach ($mainCompliance in $responseMain) {
-    $complianceState = $mainCompliance.state
-    $policyId = $mainCompliance.id
+  foreach ($mainPolicy in $responseMain) {
+    $complianceState = $mainPolicy.state
     if ($complianceState -ne "compliant") { 
-      $secondloop = FilterComplianceSecond -intuneId $intuneId -policyId $policyId
-      $list += $secondloop
+      $policyId = $mainPolicy.id
+      $policyName = $mainPolicy.displayName
+      $listSecondloop = FilterComplianceSecond -intuneId $intuneId -policyId $policyId -deviceName $deviceName -policyName -$policyName
     }
   }
-  return $list
+  return $listSecondloop
 }
 #second loop checking the compliance state per Sub policy
 function FilterComplianceSecond {
   param (
   $intuneId,  
-  $policyId
+  $policyId,
+  $deviceName,
+  $policyName
   )
-  $uriMP = "https://graph.microsoft.com/beta/deviceManagement/managedDevices/$intuneId/deviceCompliancePolicyStates/$policyid/settingStates"
+  #$filter = ""
+  $uri = "https://graph.microsoft.com/beta/deviceManagement/managedDevices/$intuneId/deviceCompliancePolicyStates/$policyid/settingStates"
   try {
-    $responseSecond = (Invoke-MgGraphRequest -Uri $uriMP -Method Get -OutputType PSObject).value
-    $responseSecond = @($responseSecond)
+    $responseSecond = (Invoke-MgGraphRequest -Uri $uri -Method Get -OutputType PSObject).value
   }
   catch {
     return "MAYDAY, Error details: $($_.Exception.Message)"
   }
-  $noComplianceState = @()
+  $listSecond = @()
   foreach ($subPolicy in $responseSecond){
     $complianceStateSubPolicy = $subPolicy.state
     if ($compliancestatesubpolicy -ne "compliant"){
-      $PolicyName = $subPolicy.setting.Split(".")
-      $collectNonCompliance = [PSCustomObject]@{
-        userName1 = $subPolicy.userPrincipalName
-        #UsernameDevice = $userDisplayName
-        policyName = $PolicyName[0]
-        policySubName = $PolicyName[-1]
-        #intuneID = $intuneId
+      $PolicyNameSecond = $subPolicy.setting.Split(".")
+      $collectNonComplianceSecond = [PSCustomObject]@{
+        deviceName = $deviceName
+        userName = $subPolicy.userPrincipalName
+        policyName = $PolicyName
+        subPolicyName = $PolicyNamesecond[-1]
       }
-      $noComplianceState += $collectNonCompliance
+      $listSecond += $collectNonComplianceSecond
     }
   }
-  return $noComplianceState
+  return  $listSecond
 }
 #Get compliance information
 function GetCompliancesDetailsPerDevice {
@@ -116,27 +121,27 @@ function GetCompliancesDetailsPerDevice {
   )
   $allNonComplianceDevices = GetAllNonComplianceDevices
   #loop all non compliance devices for non compliance policy
-  $listNonComplianceState = @()
+  $listNonCompliancePerDevice = @()
   foreach ($device in $allNonComplianceDevices) {
     $intuneId = $device.intuneId
-    #$userDisplayName = $device.userDisplayName
+    $userDisplayName = $device.userDisplayName
     $deviceName = $device.deviceName
 
     #Blacklist for devices
-    if ($deviceName -contains $blackList){
-      write-host "Device is in the blacklist"
+    if ($deviceName -like $blackList){
       break
     }
     #Get all the Not Complaint information per device
-    $firstLoop = FilterComplianceMain -intuneId $intuneId
-    $listNonComplianceState += $deviceName, $firstLoop
+    $firstLoop = FilterComplianceMain -intuneId $intuneId -deviceName $deviceName -userDisplayName $userDisplayName
 
+    $listNonCompliancePerDevice += $firstloop
+    Start-Sleep -Seconds 1 #is needed else Graph is overloaded when there are more then 10 devices
   }
-  return $listNonComplianceState
+  return $listNonCompliancePerDevice
 }  
-#Connect-MgGraph
-#
 
-$test = GetCompliancesDetailsPerDevice
-$test
-#DisConnect-MgGraph
+Connect-MgGraph
+
+$showNonCompliance = GetCompliancesDetailsPerDevice -blacklist $blackList
+$showNonCompliance
+DisConnect-MgGraph
