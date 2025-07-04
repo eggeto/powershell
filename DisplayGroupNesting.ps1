@@ -1,12 +1,56 @@
 <#
+THIS IS A BETA!!!!
 .SYNOPSIS
 find out where a group/(app) is member of/from
 apps are yet not posible or i coudn't find it.
+NEED MORE DEBUGGING FOR THE LOWER GROUPS!!!! DON'T ALWAYS SHOW THEM
 
 .DESCRIPTION
+Looks for higher and lower nested Groups
+and display them in orde + give some basic gorup info
 
 .EXAMPLE
 
+.INPUT
+A group name or A group id 
+
+.OUTPUT
+|   testgroep1 
+|   -  testgroep2 
+|   -  -  testgroep3
+|   -  -  -  testgroep6 StartGroup => startGroup is Group name from the input
+|   -  -  -  -  testgroep7
+
+doesGroupExcist : True
+groupId         : blabla
+groupName       : testgroep1
+groupType       : StaticMembership
+level           : 0
+
+doesGroupExcist : True
+groupId         : blabla
+groupName       : testgroep2
+groupType       : StaticMembership
+level           : 1
+
+doesGroupExcist : True
+groupId         : blabla
+groupName       : testgroep3
+groupType       : StaticMembership
+level           : 2
+
+doesGroupExcist : True
+groupId         : blabla
+groupName       : testgroep6
+groupType       : StaticMembership
+level           : 3
+StartGroup      : StartGroup
+
+doesGroupExcist : True
+groupId         : blabla
+groupName       : testgroep7
+groupType       : StaticMembership
+level           : 4
 
 .NOTES
     Version:        1
@@ -16,72 +60,6 @@ apps are yet not posible or i coudn't find it.
     - PowerShell
     - Microsoft Graph PowerShell SDK modules
 #>
-#apps heben geen id ... staat niet in de groep info
-# 
-
-
-#Does the app belong to a group + (group Id) or all users or all devices => check if the doubles can extiminated
-function GetAppMemberOf {
-    param (
-        $searchApp
-    )
-    $filter = "?`$select=displayname,id"
-    $filter1 = "&`$filter=displayName eq '$searchApp'"
-    $uri = "https://graph.microsoft.com/v1.0/deviceAppManagement/mobileApps$filter$filter1" #=> alle apps in intune apps
-
-    try {
-        $response = (Invoke-MgGraphRequest -Method GET -Uri $uri).value
-        $response = @($response)
-    }
-    catch {
-        <#Do this if a terminating exception happens#>
-    }
-    $listAllAppInformation = @()
-    foreach ($application in $response) {
-        $appName = $application.displayName
-        $appId = $application.id
-        $filterAppGroup = "?`$select=id,intent,target"
-        $uriMemberOfGroup = "https://graph.microsoft.com/v1.0/deviceAppManagement/mobileApps/$appId/assignments$filterAppGroup" #1) id 2)intent = required/available/... 3) target => groupId / #microsoft.graph.allLicensedUsersAssignmentTarget => all users / allDevicesAssignmentTarget => all devices / 
-    
-        try {
-            $responseGroup = (Invoke-MgGraphRequest -Method GET -Uri $uriMemberOfGroup).value
-            $responseGroup = @($responseGroup)
-            $listAppInformation = @()
-            foreach ($item in $responseGroup) {
-
-                $appInformation = [PSCustomObject] @{
-                    appName = $appName
-                    appId = $appId
-                    assigment = $item.intent
-                }
-                if ($item.target.'@odata.type' -like "*device*") {
-                    $appInformation | Add-Member -MemberType NoteProperty -Name 'type' -Value 'All Device'
-                    $appInformation | Add-Member -MemberType NoteProperty -Name 'isGroup' -Value $false
-                }
-                elseif ($item.target.'@odata.type' -like "*user*") {
-                    $appInformation | Add-Member -MemberType NoteProperty -Name 'type' -Value 'All Users'
-                    $appInformation | Add-Member -MemberType NoteProperty -Name 'isGroup' -Value $false
-                }
-                elseif ($item.target.'@odata.type' -like "*group*") {
-                    $appInformation | Add-Member -MemberType NoteProperty -Name 'type' -Value 'Group'
-                    $appInformation | Add-Member -MemberType NoteProperty -Name 'isGroup' -Value $true
-                    $appInformation | Add-Member -MemberType NoteProperty -Name 'groupId' -Value $item.target.groupid
-                    $groupName = GroupInformation -groupInfo $item.target.groupid
-                    $appInformation | Add-Member -MemberType NoteProperty -Name 'groupName' -Value $groupName[2]
-                }
-                $listAppInformation += $appInformation
-            }
-            #return $listAppInformation
-        $listAllAppInformation += $listAppInformation
-        }
-        catch {
-            <#Do this if a terminating exception happens#>
-        }
-        #$listAllAppInformation += $listAppInformation
-    }
-    return $listAllAppInformation
-}
-
 #return group information
 function GroupInformation {
     param (
@@ -262,14 +240,9 @@ function GetAllLowerGroups {
     return $listAllLowerGroups
 }
 
-#$testok = GetAppMemberOf -searchApp "DiossV4"
-#$testok
-#Connect-MgGraph
-#disConnect-MgGraph
-
 #-----------------------------MAIN-----------------------------------------
-
-$groupInfo = "testgroep6"
+Connect-MgGraph -scope Group.Read.All, GroupMember.Read.All
+$groupInfo = "YOUR GROUPNAME OR GROUPID"
 
 $currentGroupMain = GroupInformation -groupInfo $groupInfo
 #check if the group excist
@@ -303,3 +276,5 @@ foreach ($item in $listTotal) {
     }
 }
 $listTotal
+
+disConnect-MgGraph
