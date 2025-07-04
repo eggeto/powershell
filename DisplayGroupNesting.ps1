@@ -6,7 +6,7 @@ apps are yet not posible or i coudn't find it.
 NEED MORE DEBUGGING FOR THE LOWER GROUPS!!!! DON'T ALWAYS SHOW THEM
 
 .DESCRIPTION
-Looks for higher and lower nested Groups
+Looks for higher and lower nested Groups (not yet from the same level!)
 and display them in orde + give some basic gorup info
 
 .EXAMPLE
