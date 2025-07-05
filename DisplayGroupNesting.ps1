@@ -1,13 +1,14 @@
 <#
 THIS IS A BETA!!!!
 .SYNOPSIS
-find out where a group/(app) is member of/from
-apps are yet not posible or i coudn't find it.
-NEED MORE DEBUGGING FOR THE LOWER GROUPS!!!! DON'T ALWAYS SHOW THEM
+Get a tree kind of view frome nested groups where there is a connection between them.
 
 .DESCRIPTION
-Looks for higher and lower nested Groups (not yet from the same level!)
-and display them in orde + give some basic gorup info
+find all higher groups, groups from the same level and 1 level lower 
+with a connection between each other from and the input group
+apps are yet not posible or i coudn't find it.
+NEED MORE DEBUGGING FOR THE LOWER GROUPS!!!! DON'T ALWAYS SHOW THEM
+and display them in order + give some basic group info
 
 .EXAMPLE
 
@@ -230,6 +231,24 @@ function GetAllLowerGroups {
     $currentGroup = $currentGroupMain.groupId
     for ($i = 0; $i -lt $Count; $i++) {
         $currentGroup = TheFollowLowerGroup -groupId $currentGroup
+        if ($currentGroup.count -gt 1){
+            $level = ($level + 1)
+            foreach ($group in $currentGroup) {
+                $currentInfoSameLevel = GroupInformation -groupInfo $group
+                if ($currentInfoSameLevel.doesGroupExcist){
+                    $currentInfoSameLevel | Add-Member -MemberType NoteProperty -Name 'level' -Value $level
+                    $listAllLowerGroups += $currentInfoSameLevel
+                }
+            }
+        }
+        else {
+            $currentinfo = GroupInformation -groupInfo $currentGroup
+            $level = ($level + 1)
+            if ($currentinfo.doesGroupExcist){
+                $currentinfo | Add-Member -MemberType NoteProperty -Name 'level' -Value $level
+                $listAllLowerGroups += $currentinfo
+            }
+        }
         $currentinfo = GroupInformation -groupInfo $currentGroup
         $level = ($level + 1)
         if ($currentinfo.doesGroupExcist){
