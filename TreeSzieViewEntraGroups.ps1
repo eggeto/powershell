@@ -163,7 +163,7 @@ $allMainGroupIds = GetAllMainGroups
 #------------------level 0-----------------------------
 $listAllMainGroups = @()
 foreach ($groupId in $allMainGroupIds) {
-    #$groupId = "e2cbf896-9b0b-4ff8-b6ba-8de1a7963e6d"
+
     $level = 0
     $groupMain = GroupInformation -groupInfo $groupId
     $groupMain | Add-Member -MemberType NoteProperty -Name 'level' -Value $level
