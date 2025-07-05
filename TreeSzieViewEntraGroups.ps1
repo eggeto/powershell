@@ -9,7 +9,7 @@ think the opposite way (from lower to higher)will be easier
 
 .OUTPUTS
 the output is like follow:
-|  aaa - testgroep1
+|  testgroep1
 |   -  testgroep2
 |   -  -  test group
 |   -  -  testgroep3
