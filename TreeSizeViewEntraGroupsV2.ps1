@@ -28,6 +28,22 @@ the output is like follow:
 |   Test - device to user (device)
 |   -  Test user to device
 
+.TODO
+there is no check at every "level" if there are multiple groups.
+will be for later
+
+vb
+|   testgroep1
+|   -  testgroep2
+|   -  -  testgroep3
+|   -  -  -  testgroup7
+|   -  -  -  -  testgroup7a
+|   -  -  -  -  testgroup7b
+|   testgroep1
+|   -  testgroep2
+|   -  -  testgroep3
+|   -  -  test group
+
 
 .NOTES
     Version:        2
