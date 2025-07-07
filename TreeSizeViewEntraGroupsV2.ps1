@@ -31,7 +31,7 @@ the output is like follow:
 .TODO
 there is no check at every "level" if there are multiple groups.
 will be for later
-
+currently the other tree is being fully reprinted
 vb
 |   testgroep1
 |   -  testgroep2
