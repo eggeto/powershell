@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-TreeSize view for Entra Groups
+TreeSize view for Entra Groups, ONLY GROUPS!
 
 .DESCRIPTION
 Tree size view entra id groups 
