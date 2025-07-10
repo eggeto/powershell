@@ -236,4 +236,4 @@ foreach ($item in $bigBeautyFullList) {
     $start = "| "
     write-host $start ( " - " * $item.Level ) $item.groupName # " - " $item.groupType or ....
 }
-#disConnect-MgGraph
+disConnect-MgGraph
