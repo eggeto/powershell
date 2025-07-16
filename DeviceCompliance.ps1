@@ -145,5 +145,7 @@ function GetCompliancesDetailsPerDevice {
   }
   return $listNonCompliancePerDevice
 }  
+$getAllCompliance = GetCompliancesDetailsPerDevice | Sort-Object -Unique userName,policyName
+$getAllCompliance
 
 DisConnect-MgGraph
