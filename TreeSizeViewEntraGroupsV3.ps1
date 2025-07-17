@@ -209,7 +209,7 @@ $allGroupIds =  GetAllGroupsId
 $allSortedGroups = SortFromMainToSub -allGroupIds $allGroupIds
 
 $bigBeautyFullList = @() #pleace, don't think of me less now
-$listToSkip = @() # skip list
+$Global:listToSkip = @() # skip list
 
 #start the Main loop
 foreach ($currentId in $allSortedGroups) {
@@ -220,7 +220,7 @@ foreach ($currentId in $allSortedGroups) {
 #start level
     $level = 0
 #for every Main id an empty list
-    $listCurrentGroup = @()
+    $Global:listCurrentGroup = @()
     $currenGroup = OneLevelGroups -groupId $currentId -level $level #$currentGroup is to ctch the output from the function
 #look how big a nested group is + take the last part
     $bigBeautyFullList += $listCurrentGroup 
