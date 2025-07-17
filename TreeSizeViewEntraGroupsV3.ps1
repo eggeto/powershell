@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-TreeSize view for Entra Groups, ONLY GROUPS!
+TreeSize view for Entra Groups, ONLY GROUPS! Works in powershell V7.4.x, not in 5.1!
 
 .DESCRIPTION
 Tree size view entra id groups 
@@ -30,7 +30,7 @@ the output is like follow:
     Author:         eggeto
     Creation Date:  2025-07-08
     Requirements:   
-    - PowerShell
+    - PowerShell: V7.4.x
     - Microsoft Graph PowerShell SDK modules
 #>
 #input = group name or group id => check if group excist + gave basic info
