@@ -26,16 +26,12 @@ the output is like follow:
 |   -  -  -  -  testgroup7b
 
 .NOTES
-    Version:        3 => back from main group to the next lower sub groups
+    Version:        3.1 => back from main group to the next lower sub groups + no more duplicates
     Author:         eggeto
     Creation Date:  2025-07-08
     Requirements:   
     - PowerShell
     - Microsoft Graph PowerShell SDK modules
-
-.TODO
-Groups with multi nested group levels can show duplicates,
-
 #>
 #input = group name or group id => check if group excist + gave basic info
 function GroupInformation {
@@ -225,12 +221,10 @@ foreach ($currentId in $allSortedGroups) {
     $level = 0
 #for every Main id an empty list
     $listCurrentGroup = @()
-    $currentgroup = OneLevelGroups -groupId $currentId -level $level 
-    $bigBeautyFullList += $currentgroup
-#add the id's to the listToSkip  
+    $currenGroup = OneLevelGroups -groupId $currentId -level $level #$currentGroup is to ctch the output from the function
+#look how big a nested group is + take the last part
+    $bigBeautyFullList += $listCurrentGroup 
 }
-$bigBeautyFullList = $bigBeautyFullList 
-
 #write the tree structure, you can at thing that are in the function: GroupInformation  
 foreach ($item in $bigBeautyFullList) {
     $start = "| "
