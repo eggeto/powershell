@@ -69,7 +69,7 @@ function GroupInformation {
         return $false, "MAYDAY, Error details: $($_.Exception.Message)"  
     }
 }
-#paginated Graph API call
+#paginated Graph API call (not writen by me)
 function Get-GraphPagedResults {
     param(
         [Parameter(Mandatory = $true)]
