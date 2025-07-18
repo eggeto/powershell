@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-TreeSize view for Entra Groups, ONLY GROUPS! Works in powershell V7.4.x, not in 5.1!
+TreeSize view for Entra Groups, ONLY GROUPS!!
 
 .DESCRIPTION
 Tree size view entra id groups 
@@ -30,7 +30,7 @@ the output is like follow:
     Author:         eggeto
     Creation Date:  2025-07-08
     Requirements:   
-    - PowerShell: V7.4.x
+    - PowerShell: 
     - Microsoft Graph PowerShell SDK modules
 #>
 #input = group name or group id => check if group excist + gave basic info
@@ -69,19 +69,46 @@ function GroupInformation {
         return $false, "MAYDAY, Error details: $($_.Exception.Message)"  
     }
 }
-#Get the Id from all the Main Level Groups
+#paginated Graph API call
+function Get-GraphPagedResults {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Uri
+    )
+    $results = @()
+    $nextLink = $Uri
+    do {
+        try {
+            $response = Invoke-MgGraphRequest -Uri $nextLink -Method GET
+            if ($response.value) {
+                $results += $response.value
+            }
+            $nextLink = $response.'@odata.nextLink'
+        }
+        catch {
+            Write-Log "Error in pagination: $_"
+            break
+        }
+    } while ($nextLink)
+    return $results
+}
+#Get the Id from all the Main Level Groups with pagination
 function GetAllGroupsId {
     param (   
     )
     $filter = "?`$select=id"
     $uri = "https://graph.microsoft.com/v1.0/groups$filter"
+    $response = Get-GraphPagedResults -Uri $uri
+    return $response.id
+    <#
     try {
-        $response = (Invoke-MgGraphRequest -Method Get -Uri $uri -ErrorAction SilentlyContinue -StatusCodeVariable "status1").value
+        $response = (Invoke-MgGraphRequest -Method Get -Uri $newUri -ErrorAction SilentlyContinue -StatusCodeVariable "status1").value
         return $response.id
     }
     catch {
         $false, "MAYDAY, Error details: $($_.Exception.Message)"
     }
+    #>
 }
 #Give each group a level + sort from group with the most nested groups to no nested group => helps with avoiding duplicates 
 function SortFromMainToSub {
@@ -183,7 +210,7 @@ function OneLevelGroups { #skipto list nog toevoegen
     if ($allLowerGroups.count -eq 0){
         return $Global:listCurrentGroup
     }
-#subgroups
+#if there are subgroups
     elseif ($allLowerGroups.count -gt 0) {
         $level += 1
         $nextLevelGroups = NextLowerGroups -groupId $groupId
@@ -221,7 +248,7 @@ foreach ($currentId in $allSortedGroups) {
     $level = 0
 #for every Main id an empty list
     $Global:listCurrentGroup = @()
-    $currenGroup = OneLevelGroups -groupId $currentId -level $level #$currentGroup is to ctch the output from the function
+    $currenGroup = OneLevelGroups -groupId $currentId -level $level #$currentGroup is to catch the output from the function
 #look how big a nested group is + take the last part
     $bigBeautyFullList += $listCurrentGroup 
 }
