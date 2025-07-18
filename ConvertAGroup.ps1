@@ -97,7 +97,7 @@ function GetIdMembersGroup {
 #add User to the user group
 function PutItemInGroup {
     param (
-        $itemId,
+        $itemId, #for device => not the same as the intune device id or the entra device id => id from /devices!!
         $groupId,
         $type
     )
