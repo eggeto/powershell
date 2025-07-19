@@ -229,6 +229,19 @@ function MultiLevelGroup {
     } 
 }
 #---------------------------------------MAIN-------------------------
+#Install MS Graph if not available
+if (Get-Module -ListAvailable -Name Microsoft.Graph.Authentication) {
+    Write-Host "Microsoft Graph Already Installed"
+} 
+else {
+    try {
+        Install-Module -Name Microsoft.Graph.Authentication -Scope CurrentUser -Repository PSGallery -Force 
+    }
+    catch [Exception] {
+        $_.message 
+    }
+}
+import-module microsoft.graph.authentication
 connect-mggraph -Scopes Group.Read.All, GroupMember.Read.All
 #get all the main groups (level 0)
 $allGroupIds =  GetAllGroupsId   
