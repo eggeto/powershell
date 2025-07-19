@@ -195,11 +195,13 @@ function NextLowerGroups {
 function OneLevelGroups { #skipto list nog toevoegen
     param (
         $groupId,
-        $level
+        $level,
+        $groupNumber
     )
 #Get group info + add level  
     $groupInfo = GroupInformation -groupInfo $groupId
     $groupInfo | Add-Member -MemberType NoteProperty -Name 'level' -Value $level
+    $groupInfo | Add-Member -MemberType NoteProperty -Name 'groupNumber' -Value $groupNumber
     if (-not ($groupId -in $listCurrentGroup)) {
         $Global:listCurrentGroup += $groupInfo
         $Global:listToSkip += $groupId
@@ -258,12 +260,14 @@ foreach ($currentId in $allSortedGroups) {
         continue
     }
 #start level
-    $level = 0
+    $level = 0 # gives each group a number represen the nesting level
+    $groupNumber = 1 #number is for identification if the nested groups belong together
 #for every Main id an empty list
     $Global:listCurrentGroup = @()
-    $currenGroup = OneLevelGroups -groupId $currentId -level $level #$currentGroup is to catch the output from the function
+    $currenGroup = OneLevelGroups -groupId $currentId -level $level -groupNumber $groupNumber #$currentGroup is to catch the output from the function
 #look how big a nested group is + take the last part
     $bigBeautyFullList += $listCurrentGroup 
+    $groupNumber += 1
 }
 #write the tree structure, you can at thing that are in the function: GroupInformation  
 foreach ($item in $bigBeautyFullList) {
