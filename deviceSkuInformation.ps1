@@ -101,7 +101,8 @@ function GetWindowsInfo {
 
         $skuNumber = $responseSku.skuNumber
         $windows = switch ($skuNumber) {
-                4 { "Windows Pro" }
+                4 { "Windows Pro 10/11" }
+                27 { "Windows 10/11 Enterprise N" }
                 48 { "Windows Enterprise" }
                 98 { "Windows Education" }
                 100 { "Windows Home" }
@@ -109,6 +110,7 @@ function GetWindowsInfo {
                 121 { "Windows Pro Education" }
                 119 { "Windows Pro for Workstations" }
                 125 { "Windows 10 IoT Enterprise 2019 LTSC" }
+                175 { "Windows 10/11 Enterprise Multi-session"} #mostly AVD
                 191 { "Windows 10 IoT Enterprise 2021 LTSC" }
                 205 { "Windows 11 IoT Enterprise 2021 LTSC" }
                 206 { "Windows 11 IoT Enterprise GAC" }
