@@ -90,7 +90,7 @@ foreach ($device in $response) {
         continue
     }
 }
-$allWindowsDeviceInfo = $allWindowsDeviceInfo | sort-object -Property skuFamily, skuNumber, deviceName
+$allWindowsDeviceInfo = $allWindowsDeviceInfo | sort-object -Property windowsVersion 
 
 $allWindowsDeviceInfo
 
