@@ -13,8 +13,9 @@ sorted array of PSObjects with the following properties:
 - intuneId
 - deviceName
 - emailAddress
-- skuFamily
-- skuNumber
+- windowsVersion
+(- skuFamily)
+(- skuNumber)
 
 skuNumber legend:
 4	Windows Pro	=> Win 10 & 11
@@ -49,7 +50,7 @@ try {
     $response = (Invoke-MgGraphRequest -uri $uri -Method Get -OutputType PSObject).value
 }
 catch {
-    
+    #something
 }
 foreach ($device in $response) {
     $intuneId = $device.id
@@ -57,12 +58,31 @@ foreach ($device in $response) {
     $uriSku = "https://graph.microsoft.com/beta/deviceManagement/managedDevices/$intuneId$filterSku"
     try {
         $responseSku = (Invoke-MgGraphRequest -uri $uriSku -Method Get -OutputType PSObject)
+
+        $skuNumber = $responseSku.skuNumber
+        $windows =  $filter = switch ($skuNumber) {
+            4 { "Windows Pro" }
+            48 { "Windows Enterprise" }
+            98 { "Windows Education" }
+            100 { "Windows Home" }
+            101 { "Windows Home N" }
+            121 { "Windows Pro Education" }
+            119 { "Windows Pro for Workstations" }
+            125 { "Windows 10 IoT Enterprise 2019 LTSC" }
+            191 { "Windows 10 IoT Enterprise 2021 LTSC" }
+            205 { "Windows 11 IoT Enterprise 2021 LTSC" }
+            206 { "Windows 11 IoT Enterprise GAC" }
+            133 { "Windows SE" }
+            default { "Unknown SKU: $skuNumber" }
+        }
+        
         $deviceInfo = [pscustomobject]@{
             intuneId = $intuneId
             deviceName = $device.deviceName
             emailAddress = $device.emailAddress
-            skuFamily = $responseSku.skuFamily
-            skuNumber = $responseSku.skuNumber
+            windowsVersion = $windows
+            #skuFamily = $responseSku.skuFamily
+            #skuNumber = $responseSku.skuNumber
         }
         $allWindowsDeviceInfo += $deviceInfo
     }
