@@ -1,4 +1,3 @@
-#Detection Type Screen + Serial Number
 $allDisplays = Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorID
 
 $allConnectedScreens = @()
@@ -8,16 +7,18 @@ foreach ($display in $allDisplays) {
 
     $nameScreen = ($nameChars -join "").Trim()
     $serialScreen = ($serialChars -join "").Trim()
-
+    
     $connectedScreen = [PSCustomObject]@{
         nameScreen = $nameScreen
         serialScreen = $serialScreen
     }
     $allConnectedScreens += $connectedScreen
 }
-
+$ipAdres = $env:HostIP
+$allConnectedScreens += $ipAdres
+$allConnectedScreens.Count
 if ($allConnectedScreens.Count -gt 0) {
-    Write-Host $allConnectedScreens $env:HostIP
+    Write-Host $allConnectedScreens
     exit 1
 } else {
     Write-Host "no screen detected"
