@@ -11,7 +11,7 @@ $displayInfo = foreach ($display in $displays) {
     "$nameScreen ($serialScreen)"
 }
 
-if ($displayInfo.Count -gt 2) {
+if ($displayInfo.Count -gt 0) {
     Write-Host "$($displayInfo -join ', ') $env:HostIP"
     exit 1
 } else {
