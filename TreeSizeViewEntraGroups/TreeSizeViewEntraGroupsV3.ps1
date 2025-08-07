@@ -244,7 +244,7 @@ else {
     }
 }
 import-module microsoft.graph.authentication
-connect-mggraph -Scopes Group.Read.All, GroupMember.Read.All
+connect-mggraph -Scopes Group.Read.All, GroupMember.Read.All -noWelcome
 #get all the main groups (level 0)
 $allGroupIds =  GetAllGroupsId   
 #Sort the group Id, 
@@ -275,4 +275,4 @@ foreach ($item in $bigBeautyFullList) {
     write-host $start ( " - " * $item.Level ) $item.groupName # " - " $item.groupType or ....
 }
 
-disConnect-MgGraph
+#disConnect-MgGraph
