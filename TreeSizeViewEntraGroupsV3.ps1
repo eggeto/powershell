@@ -159,7 +159,7 @@ function SortByGroupMembersType {
     }
 }
 #return all the group id's from 1 Main  group 
-function AllGroupMemberFromLowerGroups { # kijken om enkel groepen of apps weer te even
+function AllGroupMemberFromLowerGroups { 
     param (
         $groupId
     )
@@ -192,7 +192,7 @@ function NextLowerGroups {
     }
 }
 #check if a group have nested groups, get group info and add group to an array 
-function OneLevelGroups { #skipto list nog toevoegen
+function OneLevelGroups {
     param (
         $groupId,
         $level,
@@ -264,14 +264,15 @@ foreach ($currentId in $allSortedGroups) {
     $groupNumber = 1 #number is for identification if the nested groups belong together
 #for every Main id an empty list
     $Global:listCurrentGroup = @()
-    $currenGroup = OneLevelGroups -groupId $currentId -level $level -groupNumber $groupNumber #$currentGroup is to catch the output from the function
+    $currentGroup = OneLevelGroups -groupId $currentId -level $level -groupNumber $groupNumber #$currentGroup is to catch the output from the function
 #look how big a nested group is + take the last part
     $bigBeautyFullList += $listCurrentGroup 
     $groupNumber += 1
 }
-#write the tree structure, you can at thing that are in the function: GroupInformation  
+#write the tree structure, you can add thing that are in the function: GroupInformation  
 foreach ($item in $bigBeautyFullList) {
     $start = "| "
     write-host $start ( " - " * $item.Level ) $item.groupName # " - " $item.groupType or ....
 }
+
 disConnect-MgGraph
