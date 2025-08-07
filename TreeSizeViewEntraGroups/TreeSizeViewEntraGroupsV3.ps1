@@ -16,11 +16,11 @@ nothing
 
 .OUTPUTS
 the output is like follow:
-|   testgroep1              -> Main Group
-|   -  testgroep2
+|   testgroup1              -> Main Group
+|   -  testgroup2
 |   -  -  test group
 |   -  -  -  testgroup6
-|   -  -  testgroep3
+|   -  -  testgroup3
 |   -  -  -  testgroup7
 |   -  -  -  -  testgroup7a
 |   -  -  -  -  testgroup7b
