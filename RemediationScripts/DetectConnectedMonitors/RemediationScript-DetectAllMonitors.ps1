@@ -39,7 +39,6 @@ function Main {
     }
 
     $blobUrl = "YOUR BLOB URL"
-    #verloopt op 14/08/2026
     $sasToken = "YOUR SAS KEY"
     #update json
     UpdateJson -sasToken $sasToken -blobUrl $blobUrl -updateLocalMonitors $localInformationUser
