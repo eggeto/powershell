@@ -38,9 +38,9 @@ function Main {
         details = $localInformation
     }
 
-    $blobUrl = "https://monitorusers.blob.core.windows.net/monitoruserjson/display.json"
+    $blobUrl = "YOUR BLOB URL"
     #verloopt op 14/08/2026
-    $sasToken = "sp=raw&st=2025-08-13T07:22:50Z&se=2026-08-13T15:37:50Z&spr=https&sv=2024-11-04&sr=b&sig=xWUgCP6Qope14chRVUNGPURXkmSixDXLq%2BUsXHvcJ14%3D"
+    $sasToken = "YOUR SAS KEY"
     #update json
     UpdateJson -sasToken $sasToken -blobUrl $blobUrl -updateLocalMonitors $localInformationUser
 }
