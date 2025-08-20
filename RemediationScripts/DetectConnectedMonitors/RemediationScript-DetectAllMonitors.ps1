@@ -66,7 +66,6 @@ function UpdateJson {
     }
 # update excisting user
     elseif ($updateLocalMonitors.name -in $allCloudInformation.name) {
-        #$newScreen = @{nameScreen = "NEW SCREEN"; serialScreen = "XYZ123"}
         foreach ($cloudInfo in $allCloudInformation) {
             if ($cloudInfo.name -eq $updateLocalMonitors.name) {
                 foreach ($localScreen in $updateLocalMonitors.details.screens){
@@ -74,8 +73,7 @@ function UpdateJson {
                     if ($localScreen -notin $cloudInfo.details.screens) {
                         $cloudInfo.details.screens += $localScreen
                     }
-                }
-                #$cloudInfo.details.screens += $newScreen                   
+                }                  
             }
         }
     }
@@ -94,7 +92,8 @@ function UpdateJson {
     return $true
     }
     catch {
-    return $false, $($_.Exception.Message)
+        return $false, $($_.Exception.Message)
     }
 }
+
 main
