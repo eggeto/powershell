@@ -11,10 +11,9 @@ This script retrieves monitor information, current time, ip address and the name
 you can deploy the script via an intune remediation script for multiple runs or via script for a single run or ...
 you also need to config an azure blob storage as json to store the information.
 
-This script is not made for a huge number of users => use groups,
+This script is not made for a huge number of devices => use small groups +/- 20 devices,
 also don't run it for a long time.
-It will work,
-but a blob storage is not made for this,
+Keep in mind the limits of blob storage!!
 also the bigger it gets the slower it will be.
 for that there are databases!
 
