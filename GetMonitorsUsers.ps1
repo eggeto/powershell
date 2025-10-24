@@ -15,7 +15,10 @@ This script is not made for a huge number of devices => use small groups +/- 20 
 also don't run it for a long time.
 Keep in mind the limits of blob storage!!
 also the bigger it gets the slower it will be.
-for that there are databases!
+for that there are databases
+or you can use log log analytics
+or ...
+but then the cost will be higher!
 
 the script only collect data
 and store it in the cloud,
