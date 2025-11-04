@@ -1,28 +1,34 @@
 <#
 .SYNOPSIS
 !!CONTACT YOUR CHIEF INFORMATION OFFICER BEFORE USING THIS SCRIPT FOR GPDR or ...!!
+It is one way to collect information about monitors.
 GET monitor information from devices connected to Intune
 and store it in Azure Blob Storage as JSON file.
+This script is not made for a huge number of devices => use small groups +/- 20 devices!
 
 .DESCRIPTION
 !!CONTACT YOUR CHIEF INFORMATION OFFICER BEFORE USING THIS SCRIPT FOR GPDR or ...!!
 At the moment there is no option in intune to collect monitor information from devices.
 This script retrieves monitor information, current time, ip address and the name from the loggin user.
-you can deploy the script via an intune remediation script for multiple runs or via script for a single run or ...
+You can deploy the script via an intune remediation script for multiple runs or via script for a single run or ...
 you also need to config an azure blob storage as json to store the information.
 
 This script is not made for a huge number of devices => use small groups +/- 20 devices,
 also don't run it for a long time.
 Keep in mind the limits of blob storage!!
 also the bigger it gets the slower it will be.
-for that there are databases
-or you can use log log analytics
-or ...
-but then the cost will be higher!
+
+My preference go to log analytics,
+but this depends on your subscription, choose what suits you best!
+You can use follow tutorial => https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal
+for this you need the first functio (function GetLocalData) and convert it to json format,
+for the rest you can follow the tutorial.
 
 the script only collect data
 and store it in the cloud,
 for analysing ... you can add code or download the data as a .csv file or ... 
+
+Feedback is always welcome!
 
 .EXAMPLE
 => .FORMAT
