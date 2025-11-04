@@ -5,6 +5,7 @@ It is one way to collect information about monitors.
 GET monitor information from devices connected to Intune
 and store it in Azure Blob Storage as JSON file.
 This script is not made for a huge number of devices => use small groups +/- 20 devices!
+@line 236 & 238 fill in the following: $blobUrl and $sasToken
 
 .DESCRIPTION
 !!CONTACT YOUR CHIEF INFORMATION OFFICER BEFORE USING THIS SCRIPT FOR GPDR or ...!!
