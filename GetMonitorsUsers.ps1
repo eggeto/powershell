@@ -108,7 +108,7 @@ function GetLocalData {
     $allDisplays = Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorID
 
     $user = (Get-ItemProperty "HKCU:\\Software\\Microsoft\\Office\\Common\\UserInfo\\").UserName
-    $ipAdres = $env:HostIP
+    $ipAdres = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '169.*' -and $_.IPAddress -ne '127.0.0.1' }).IPAddress
     $currentDate = Get-Date -Format "yyyy-MM-dd"
     $listLocalMonitors = @()
 
