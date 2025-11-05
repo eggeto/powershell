@@ -231,6 +231,7 @@ function MultiLevelGroup {
     } 
 }
 #---------------------------------------MAIN-------------------------
+<# when already installed is possible the rest will not work! when not shure run this separately!!!!!!!!!!
 #Install MS Graph if not available
 if (Get-Module -ListAvailable -Name Microsoft.Graph.Authentication) {
     Write-Host "Microsoft Graph Already Installed"
@@ -244,6 +245,7 @@ else {
     }
 }
 import-module microsoft.graph.authentication
+#>
 connect-mggraph -Scopes Group.Read.All, GroupMember.Read.All -noWelcome
 #get all the main groups (level 0)
 $allGroupIds =  GetAllGroupsId   
@@ -276,3 +278,4 @@ foreach ($item in $bigBeautyFullList) {
 }
 
 #disConnect-MgGraph
+
