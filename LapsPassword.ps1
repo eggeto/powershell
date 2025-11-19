@@ -1,9 +1,32 @@
 <#
+.SYNOPSIS
 Get laps password from user or device
 
-a user can have multiple devices,
-but a device can have 1 laps 
-need to add for a device
+.DESCRIPTION
+Get laps password from user or device
+add the user email or device name in line 84-85
+
+.INPUTS
+the mail adres from a user
+the intune device name from a device
+
+.OUTPUTS
+
+
+.Example
+
+.MODULE
+Microsoft.Graph.Authentication
+
+.MADE
+Eggeto
+
+log:
+12/11/2025
+made script
+
+TO DO:
+auto input detection (user or device)
 #>
 #Get Azure AD Device ID from user
 function GetAzureAdDeviceId {
