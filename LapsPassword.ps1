@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-Get laps password from user or device
+Get laps password from a device
 
 .DESCRIPTION
-Get laps password from user or device
+Get laps password from a device
 add the user email or device name in line 84-85
 
 .INPUTS
@@ -11,7 +11,8 @@ the mail adres from a user
 the intune device name from a device
 
 .OUTPUTS
-
+the LAPS password is: $password for user: $user
+also functio: GetLapsPasswordUser returns the password
 
 .Example
 
