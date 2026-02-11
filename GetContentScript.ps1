@@ -1,14 +1,7 @@
-<#
-Get all scripts + content from intune scripts (not remediations!!!)
+#Get all scripts + content from intune scripts (not remediations!!!)
+#https://www.linkedin.com/pulse/cant-see-content-your-intune-platform-script-problem-isnt-t%C3%BCrkoglu-khbzf/
 
-If you want to know the content from a script in intune
-and you have the name, but don't have the original script.
-
-Thsi script will retrevie the code from that script
-
-made: 26/01/2026
-by: eggeto
-#>
+#optie om alle scripts up te louden naar een siem server voor als er veranderingen gebeuren aan het script, helaas kunnen we niet zien door welke persoon! (momenteel)
 
 function GetInfoScript {
     param (
@@ -30,12 +23,10 @@ function GetInfoScript {
     $text   = [System.Text.Encoding]::UTF8.GetString($bytes)
 
     return $text
-
 }
 
 function main {
     param (
-        
     )
 #Get all scripts info
     $filter = "?`$select=id,displayName,description,fileName"    
@@ -49,7 +40,7 @@ function main {
     }
     
     write-host "All available scripts names" -ForegroundColor Green
-    write-host $response.displayName -ForegroundColor Cyan
+    write-host ($response.displayName -join ' - ') -ForegroundColor Cyan
     write-host ""
 
     $input = Read-Host "Type the script name, you want to see the content from:"
@@ -61,6 +52,8 @@ function main {
             $scriptDescription = $item.description
 #get content from script + show it
             $getInfo = GetInfoScript -info $item
+# write script to file
+            $getInfo | Out-File -FilePath "C:\Powershell\$scriptName.ps1"
 #write out
             Write-Host "the name is: $scriptName" 
             Write-Host "with description: $scriptDescription"
@@ -74,4 +67,3 @@ Connect-MgGraph -Scopes DeviceManagementScripts.Read.All
 main
 
 #disConnect-MgGraph
-
