@@ -50,7 +50,7 @@ function main {
         if ($item.displayName -eq $input) {
             $scriptName = $item.displayName
             $scriptDescription = $item.description
-#get content from script + show it
+#get content from script
             $getInfo = GetInfoScript -info $item
 # write script to file
             $getInfo | Out-File -FilePath "C:\Powershell\$scriptName.ps1"
