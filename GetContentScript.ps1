@@ -1,7 +1,19 @@
-#Get all scripts + content from intune scripts (not remediations!!!)
-#https://www.linkedin.com/pulse/cant-see-content-your-intune-platform-script-problem-isnt-t%C3%BCrkoglu-khbzf/
+<#
+.SYNOPSIS
+Display all Intune script,
+if you provide a script name via terminal
+the content from the script will be writen to c:\powershell\"scriptname".ps1
+Also de content from the script will be displayed in the output
+-> Not for remediations!!!
 
-#optie om alle scripts up te louden naar een siem server voor als er veranderingen gebeuren aan het script, helaas kunnen we niet zien door welke persoon! (momenteel)
+.NOTES
+    Version:        1.0
+    Author:         eggeto
+    Creation Date:  2026-02-03
+    Requirements:   
+    - PowerShell: 
+    - Microsoft Graph PowerShell SDK modules
+#>
 
 function GetInfoScript {
     param (
