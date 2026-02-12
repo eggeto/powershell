@@ -54,6 +54,7 @@ function main {
             $getInfo = GetInfoScript -info $item
 # write script to file
             $getInfo | Out-File -FilePath "C:\Powershell\$scriptName.ps1"
+            write-host "writing script in folder c:\Powershell\$scriptName.pst1"
 #write out
             Write-Host "the name is: $scriptName" 
             Write-Host "with description: $scriptDescription"
