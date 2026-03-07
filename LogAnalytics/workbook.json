@@ -1,0 +1,104 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Monitor Inventory Dashboard"
+      },
+      "name": "text - 0"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MonitorLogAnalitics_CL | summarize TotalMonitors=count()",
+        "size": 2,
+        "title": "Total Monitor Records",
+        "timeContext": {
+          "durationMs": 2592000000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/7e1f6e81-d2c1-4eb7-8499-818a2cd0d0b0/resourceGroups/LogAnalytics/providers/Microsoft.OperationalInsights/workspaces/MonitorLogAnalytics"
+        ],
+        "visualization": "table",
+        "tileSettings": {
+          "titleContent": {},
+          "showBorder": false,
+          "sortCriteriaField": "TotalMonitors"
+        }
+      },
+      "name": "query - 1"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MonitorLogAnalitics_CL\n| summarize Screens=count() by user\n| sort by Screens desc",
+        "size": 1,
+        "title": "Screens per Computer",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/7e1f6e81-d2c1-4eb7-8499-818a2cd0d0b0/resourceGroups/LogAnalytics/providers/Microsoft.OperationalInsights/workspaces/MonitorLogAnalytics"
+        ],
+        "visualization": "table"
+      },
+      "name": "query - 2"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MonitorLogAnalitics_CL\n| summarize arg_max(TimeGenerated, *) by serialNumber\n| summarize count() by screenName\n| sort by count_ desc",
+        "size": 1,
+        "title": "Monitor Models",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/7e1f6e81-d2c1-4eb7-8499-818a2cd0d0b0/resourceGroups/LogAnalytics/providers/Microsoft.OperationalInsights/workspaces/MonitorLogAnalytics"
+        ],
+        "visualization": "barchart"
+      },
+      "name": "query - 3"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MonitorLogAnalitics_CL\n| summarize arg_max(TimeGenerated, *) by serialNumber, computerName\n| summarize Screens=count() by computerName, user\n| extend ScreenCategory = case(\n    Screens == 1, \"1 Screen\",\n    Screens == 2, \"2 Screens\",\n    Screens >= 3, \"3+ Screens\",\n    \"Unknown\"\n)\n| project user, computerName, Screens, ScreenCategory\n| sort by ScreenCategory asc",
+        "size": 1,
+        "title": "Users With Multiple Screens",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/7e1f6e81-d2c1-4eb7-8499-818a2cd0d0b0/resourceGroups/LogAnalytics/providers/Microsoft.OperationalInsights/workspaces/MonitorLogAnalytics"
+        ],
+        "visualization": "table"
+      },
+      "name": "query - 4"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "MonitorLogAnalitics_CL\n| summarize arg_max(TimeGenerated, *) by serialNumber\n| project TimeGenerated, user, computerName, screenName, serialNumber\n| sort by TimeGenerated desc",
+        "size": 2,
+        "title": "Monitor Inventory",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/7e1f6e81-d2c1-4eb7-8499-818a2cd0d0b0/resourceGroups/LogAnalytics/providers/Microsoft.OperationalInsights/workspaces/MonitorLogAnalytics"
+        ],
+        "visualization": "table"
+      },
+      "name": "query - 5"
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
