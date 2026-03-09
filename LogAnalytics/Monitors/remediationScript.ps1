@@ -99,6 +99,12 @@ $body | out-file c:\temp\MonitorInventory.json # you need this for making the ta
 $bearerToken = CreateToken -appId $variables.appId -tenantId $variables.tenantId -appSecret $variables.appSecret
 if ($bearerToken){
     PostToLogAnalytics -bearerToken $bearerToken -dceURI $variables.dceURI -dcrImmutableId $variables.dcrImmutableId -table $variables.table -body $body
+    exit 0
+}
+else {
+    write-host "token is not created, exiting script"
+    exit 1
 }
                                     
                                   
+
