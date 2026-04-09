@@ -22,7 +22,8 @@ also the bigger it gets the slower it will be.
 My preference go to log analytics,
 but this depends on your subscription, choose what suits you best!
 You can use follow tutorial => https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal
-for this you need the first functio (function GetLocalData) and convert it to json format,
+at follow location you can find the powershell script and an example from a workbook: 
+https://github.com/eggeto/powershell/tree/main/LogAnalytics/Monitors
 for the rest you can follow the tutorial.
 
 the script only collect data
