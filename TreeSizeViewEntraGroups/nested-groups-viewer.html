@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nested Groups Viewer</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --text: #e8eaf0;
+    --text-muted: #7a7f9a;
+    --text-dim: #454a6a;
+    --l0: #6c63ff;
+    --l1: #00d4aa;
+    --l2: #f5a623;
+    --l3: #e05c7a;
+    --hl: #ffd166;
+    --radius: 8px;
+    --font: 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 9px 12px 9px 36px;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  input[type="text"]:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder { color: var(--text-dim); }
+
+  .btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 9px 14px;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { border-color: var(--accent); color: var(--text); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { opacity: 0.85; }
+
+  .counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    padding: 9px 0;
+  }
+
+  /* JSON editor panel */
+  #editorPanel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  #editorPanel.open { display: block; }
+
+  #jsonArea {
+    width: 100%;
+    height: 200px;
+    background: var(--surface);
+    border: none;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 12px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.6;
+  }
+
+  .editor-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  #errMsg {
+    font-size: 12px;
+    color: #e05c7a;
+    flex: 1;
+    display: none;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 0.75rem;
+  }
+
+  .ctrl-link {
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .ctrl-link:hover { color: var(--text); }
+
+  /* Tree */
+  #tree { padding-bottom: 2rem; }
+
+  .node {
+    margin: 3px 0;
+  }
+
+  .node-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background .1s;
+    border-left: 2px solid transparent;
+  }
+
+  .node-header:hover { background: var(--surface); }
+
+  .node.l0 > .node-header { border-left-color: var(--l0); }
+  .node.l1 > .node-header { border-left-color: var(--l1); }
+  .node.l2 > .node-header { border-left-color: var(--l2); }
+  .node.l3 > .node-header { border-left-color: var(--l3); }
+
+  .toggle-icon {
+    font-size: 10px;
+    color: var(--text-dim);
+    width: 12px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: transform .15s;
+    font-style: normal;
+  }
+
+  .toggle-icon.open { transform: rotate(90deg); }
+
+  .level-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+  }
+
+  .node.l0 .level-badge { background: rgba(108,99,255,.2); color: var(--l0); }
+  .node.l1 .level-badge { background: rgba(0,212,170,.15); color: var(--l1); }
+  .node.l2 .level-badge { background: rgba(245,166,35,.15); color: var(--l2); }
+  .node.l3 .level-badge { background: rgba(224,92,122,.15); color: var(--l3); }
+
+  .node-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .node-id {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .child-count {
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  .children {
+    padding-left: 20px;
+    display: none;
+    border-left: 1px dashed var(--border);
+    margin-left: 16px;
+  }
+
+  .children.open { display: block; }
+
+  .highlight {
+    background: rgba(255,209,102,.25);
+    color: var(--hl);
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+
+  .no-results {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 3rem 0;
+    font-size: 13px;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 1rem; }
+    .legend { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span>//</span> Nested Groups Viewer</h1>
+  <p class="subtitle">PowerShell PSObject JSON explorer</p>
+</header>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input type="text" id="searchInput" placeholder="Zoek op naam of groupId..." oninput="onSearch(this.value)">
+  </div>
+  <button class="btn" onclick="toggleEditor()">&#123; &#125; JSON laden</button>
+  <span class="counter" id="counter"></span>
+</div>
+
+<div id="editorPanel">
+  <textarea id="jsonArea" placeholder='Plak hier je JSON, bijv. output van:
+$nestedGroups | ConvertTo-Json -Depth 10
+
+Verwacht formaat: array van objecten met groupId, name, level, childId, nestedGroup'></textarea>
+  <div class="editor-footer">
+    <span id="errMsg"></span>
+    <button class="btn primary" onclick="loadJSON()">Laden &rarr;</button>
+    <button class="btn" onclick="loadSample()">Sample data</button>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--l0)"></div>Level 0 — Hoofd</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--l1)"></div>Level 1</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--l2)"></div>Level 2</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--l3)"></div>Level 3</div>
+</div>
+
+<div class="controls">
+  <span class="ctrl-link" onclick="setAll(true)">&#9660; Alles uitklappen</span>
+  <span class="ctrl-link" onclick="setAll(false)">&#9658; Alles inklappen</span>
+</div>
+
+<div id="tree"></div>
+
+<script>
+const SAMPLE = [
+  {groupId:"root1",name:"IT Afdeling",level:0,childId:["t1","t2"],nestedGroup:[
+    {groupId:"t1",name:"Infrastructure",level:1,childId:["s1","s2"],nestedGroup:[
+      {groupId:"s1",name:"Netwerk",level:2,childId:["n1"],nestedGroup:[
+        {groupId:"n1",name:"Firewall team",level:3,childId:[],nestedGroup:[]}
+      ]},
+      {groupId:"s2",name:"Servers",level:2,childId:[],nestedGroup:[]}
+    ]},
+    {groupId:"t2",name:"Development",level:1,childId:["d1","d2"],nestedGroup:[
+      {groupId:"d1",name:"Frontend",level:2,childId:[],nestedGroup:[]},
+      {groupId:"d2",name:"Backend",level:2,childId:[],nestedGroup:[]}
+    ]}
+  ]},
+  {groupId:"root2",name:"HR Afdeling",level:0,childId:["h1"],nestedGroup:[
+    {groupId:"h1",name:"Recruitment",level:1,childId:["r1"],nestedGroup:[
+      {groupId:"r1",name:"Campus hiring",level:2,childId:[],nestedGroup:[]}
+    ]}
+  ]}
+];
+
+let data = SAMPLE;
+let query = '';
+let matchCount = 0;
+
+function toggleEditor() {
+  document.getElementById('editorPanel').classList.toggle('open');
+}
+
+function loadSample() {
+  document.getElementById('jsonArea').value = JSON.stringify(SAMPLE, null, 2);
+}
+
+function loadJSON() {
+  const raw = document.getElementById('jsonArea').value.trim();
+  const err = document.getElementById('errMsg');
+  try {
+    data = JSON.parse(raw);
+    err.style.display = 'none';
+    document.getElementById('editorPanel').classList.remove('open');
+    render();
+  } catch(e) {
+    err.textContent = 'Ongeldige JSON: ' + e.message;
+    err.style.display = 'block';
+  }
+}
+
+function hl(text, q) {
+  if (!q) return String(text || '');
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return String(text || '').replace(re, '<span class="highlight">$1</span>');
+}
+
+function matches(node, q) {
+  if (!q) return true;
+  const lq = q.toLowerCase();
+  return String(node.groupName || node.name || '').toLowerCase().includes(lq) ||
+         String(node.groupId || '').toLowerCase().includes(lq);
+}
+
+function nodeVisible(node, q) {
+  if (!q || matches(node, q)) return true;
+  if (node.nestedGroup && node.nestedGroup.length)
+    return node.nestedGroup.some(c => nodeVisible(c, q));
+  return false;
+}
+
+function buildNode(node, q) {
+  if (!nodeVisible(node, q)) return null;
+  const isMatch = matches(node, q);
+  if (isMatch && q) matchCount++;
+
+  const hasChildren = node.nestedGroup && node.nestedGroup.length > 0;
+  const open = !!q && node.nestedGroup && node.nestedGroup.some(c => nodeVisible(c, q));
+
+  const div = document.createElement('div');
+  div.className = 'node l' + (node.level || 0);
+
+  const header = document.createElement('div');
+  header.className = 'node-header';
+
+  const tog = document.createElement('i');
+  tog.className = 'toggle-icon' + (open ? ' open' : '');
+  tog.textContent = hasChildren ? '▶' : ' ';
+
+  const badge = document.createElement('span');
+  badge.className = 'level-badge';
+  badge.textContent = 'L' + (node.level ?? '?');
+
+  const name = document.createElement('span');
+  name.className = 'node-name';
+  name.innerHTML = hl(node.groupName || node.name || '(geen naam)', q);
+
+  const id = document.createElement('span');
+  id.className = 'node-id';
+  id.innerHTML = hl(node.groupId || '', q);
+
+  header.append(tog, badge, name, id);
+
+  if (hasChildren) {
+    const cnt = document.createElement('span');
+    cnt.className = 'child-count';
+    cnt.textContent = node.nestedGroup.length + ' sub';
+    header.appendChild(cnt);
+
+    const children = document.createElement('div');
+    children.className = 'children' + (open ? ' open' : '');
+
+    node.nestedGroup.forEach(c => {
+      const cn = buildNode(c, q);
+      if (cn) children.appendChild(cn);
+    });
+
+    div.appendChild(header);
+    div.appendChild(children);
+
+    header.onclick = () => {
+      const isOpen = children.classList.toggle('open');
+      tog.classList.toggle('open', isOpen);
+    };
+  } else {
+    div.appendChild(header);
+  }
+
+  return div;
+}
+
+function render() {
+  matchCount = 0;
+  const tree = document.getElementById('tree');
+  tree.innerHTML = '';
+  const q = query.trim();
+  let shown = 0;
+
+  data.filter(n => nodeVisible(n, q)).forEach(n => {
+    const el = buildNode(n, q);
+    if (el) { tree.appendChild(el); shown++; }
+  });
+
+  if (shown === 0) {
+    tree.innerHTML = '<div class="no-results">Geen resultaten gevonden voor "' + q + '"</div>';
+  }
+
+  const ctr = document.getElementById('counter');
+  ctr.textContent = q ? matchCount + ' treffer' + (matchCount !== 1 ? 's' : '') : data.length + ' root groep' + (data.length !== 1 ? 'en' : '');
+}
+
+function onSearch(v) { query = v; render(); }
+
+function setAll(open) {
+  document.querySelectorAll('.children').forEach(el => el.classList.toggle('open', open));
+  document.querySelectorAll('.toggle-icon').forEach(el => {
+    if (el.textContent.trim() === '▶') el.classList.toggle('open', open);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
