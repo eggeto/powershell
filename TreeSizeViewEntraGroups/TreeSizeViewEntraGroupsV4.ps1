@@ -250,14 +250,14 @@ function MultiLevelGroup {
   } 
 }
 #### Making nested json structure  ####
-#
-function FunctionName {
+#preparations for nesting
+function PrepareNesting {
     param (
         $bigBeautyFullList
     )
     $allGroups = @()
-#sort the groups, that belong to the same tree
-    $numbers = $bigBeautyFullList | Select-Object -ExpandProperty groupNumber #-Unique
+#sort the groups, that belong to the same tree !!!!!!!-Unique is needed otherwise you have a lot of dubbels!!!!!!!!!!
+    $numbers = $bigBeautyFullList | Select-Object -ExpandProperty groupNumber -Unique
     foreach ($num in $numbers) {
         $groupTree = $bigBeautyFullList  | Where-Object { $_.groupNumber -eq $num } | Sort-Object level
         #$groupTree
@@ -268,7 +268,7 @@ function FunctionName {
         }
 #and now the nesting begins
         else {
-            $nestedGroupTree = MakeNestedPSObject -groupTree $groupTree
+            $nestedGroupTree = StartNesting -groupTree $groupTree
             $allGroups += $nestedGroupTree
         }  
     }
@@ -276,7 +276,7 @@ function FunctionName {
     return $nestedGroupsJson
 }
 #part 1 of nesting, begin with the beginning
-function MakeNestedPSObject {
+function StartNesting {
     param (
         $groupTree
     )
@@ -355,7 +355,7 @@ foreach ($currentId in $allSortedGroups) {
   $groupNumber += 1
 }
 #convert beautiful list to json
-$json = FunctionName -bigBeautyFullList $bigBeautyFullList
+$json = PrepareNesting -bigBeautyFullList $bigBeautyFullList
 $json | Out-File -FilePath "C:\temp\nestedGroups.json"
 
 <#
