@@ -2,6 +2,14 @@
 .SYNOPSIS
 TreeSize view for Entra Groups, ONLY GROUPS!!
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+I just discovered $expand...
+https://graph.microsoft.com/v1.0/groups?$expand=members($select=id,displayName,groupTypes)&$select=id,displayName,groupTypes
+I had been looking for it, but couldn't find it at the time...
+Still kind of proud of the code though,
+sometimes the journey is more important than the destination, right? :-)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 .DESCRIPTION
 Tree size view entra id groups 
 entra-id groups should be flat ... :-) 
