@@ -18,7 +18,7 @@ nothing
 write the json file to the C:\temp\nestedGroups.json"
 [
   {
-    "doesGroupExcist": true,
+    "doesGroupExist": true,
     "groupId": "e2cbf896-9b0b-4ff8-b6ba-8de1a7963e6d",
     "groupName": "testgroep1",
     "groupType": "StaticMembership",
@@ -26,7 +26,7 @@ write the json file to the C:\temp\nestedGroups.json"
     "groupNumber": 1,
     "nestedGroup": [
       {
-        "doesGroupExcist": true,
+        "doesGroupExist": true,
         "groupId": "13a22ce5-4e6a-481e-9072-7accd68cf9b1",
         "groupName": "testgroep2",
         "groupType": "StaticMembership",
@@ -65,7 +65,7 @@ function GroupInformation {
       $groupId = $response.id
       if ($groupId) {
           $groupInformationComplete = [PSCustomObject] @{
-              doesGroupExcist = $true
+              doesGroupExist = $true
               groupId = $groupId
               groupName = $response.displayName
               groupType = if ($null -eq $response.groupTypes){"StaticMembership"} else {$response.groupTypes}
