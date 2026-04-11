@@ -27,7 +27,7 @@ write the json file to the C:\temp\nestedGroups.json"
 [
   {
     "doesGroupExist": true,
-    "groupId": "e2cbf896-9b0b-4ff8-b6ba-8de1a7963e6d",
+    "groupId": "one group id",
     "groupName": "testgroep1",
     "groupType": "StaticMembership",
     "level": 0,
@@ -35,7 +35,7 @@ write the json file to the C:\temp\nestedGroups.json"
     "nestedGroup": [
       {
         "doesGroupExist": true,
-        "groupId": "13a22ce5-4e6a-481e-9072-7accd68cf9b1",
+        "groupId": "one other group id",
         "groupName": "testgroep2",
         "groupType": "StaticMembership",
         "level": 1,
