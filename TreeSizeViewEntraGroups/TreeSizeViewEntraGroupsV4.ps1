@@ -209,7 +209,7 @@ function OneLevelGroups {
       $level,
       $groupNumber
   )
-#Get group info + add level  
+#Get group info + add level, groupNumber, array nestedGroup and array childId
   $groupInfo = GroupInformation -groupInfo $groupId
   $groupInfo | Add-Member -MemberType NoteProperty -Name 'level' -Value $level
   $groupInfo | Add-Member -MemberType NoteProperty -Name 'groupNumber' -Value $groupNumber
@@ -246,6 +246,7 @@ function MultiLevelGroup {
   $nextGroupIds = @($nextGroupIds)
   foreach ($currentGroupId in $nextGroupIds) {
       OneLevelGroups -groupId $currentGroupId -level $level -groupNumber $groupNumber
+#add child group to the current group
       $groupInfo.childId += $currentGroupId
   } 
 }
