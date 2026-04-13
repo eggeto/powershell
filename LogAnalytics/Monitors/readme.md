@@ -8,6 +8,9 @@ Because the Log Analytics HTTP Data Collector API is end of life
 is this the updated version that use Logs Ingestion API.
 It also has pro & cons :-)
 
+You can largely follow this tutorial when setting it up:
+https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal
+
 A (part of) a visual example,
 I’ve had to blur some parts for security reasons.
 
