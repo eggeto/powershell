@@ -243,12 +243,8 @@ function SortServers {
         $deviceType = $device.type
         if ($deviceType -eq "server" -and $deviceDate -lt $targetDate) {
             $oldServers.Add($device) #start using method add() instead of += !!!!
-        
         }
     }
-
-# Tonen in console
-    #write-host $oldDevices 
     return $oldServers
 }
 
