@@ -1,6 +1,8 @@
 <#
 .SYNOPSIS
-Automatically remove old devices/servers from Sophos Central based on Intune device inventory (for devices) and last seen date (for servers).
+Automatically remove old devices/servers from Sophos Central, 
+based on Intune device inventory (for devices) 
+and last seen date (for servers).
 
 .DESCRIPTION
 Automatically remove old devices/servers from Sophos Central.
