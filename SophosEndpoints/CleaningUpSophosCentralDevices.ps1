@@ -209,6 +209,10 @@ function SortDevices {
     )
     $allNotMatched = [System.Collections.Generic.List[object]]::new()
     foreach ($sophosDevice in $listSophosDevices) {
+        $deviceType = $sophosDevice.type
+        if ($deviceType -eq "server"){
+            continue
+        }
         $found = $false
         foreach  ($intuneDevice  in $listIntuneDevices) {
             $sophosHostname = $sophosDevice.hostname
@@ -218,7 +222,7 @@ function SortDevices {
                 break
             }
         }
-        $deviceType = $sophosDevice.type
+       
         if (-not $found -and $deviceType -ne "server") {
             #Write-Host "Not found: $sophosDevice"
             $allNotMatched.add($sophosDevice)
