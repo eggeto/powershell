@@ -99,7 +99,7 @@ function GetSophosToken {
         $clientId,
         $clientSecret
     )
-#Step 1 -> Get Token
+#Get Token
     try {
         $tokenResponse = Invoke-RestMethod -Method POST -Uri "https://id.sophos.com/api/v2/oauth2/token" -ContentType "application/x-www-form-urlencoded" -Body "grant_type=client_credentials&client_id=$clientId&client_secret=$clientSecret&scope=token"
         write-host "Got Token" -ForegroundColor Green
@@ -110,7 +110,7 @@ function GetSophosToken {
     }
     $accessToken = $tokenResponse.access_token
 
-#Step 2 -> Get tenantId (tenant + region) 
+#Get tenantId (tenant + region) 
     try {
         $tenantResponse = Invoke-RestMethod -Method GET -Uri "https://api.central.sophos.com/whoami/v1" -Headers @{ Authorization = "Bearer $accessToken" }
         write-host "Got tenant info" -ForegroundColor Green
@@ -138,7 +138,7 @@ function GetAllSophosDevices {
     )
     $accessToken = $tenantInfo.accessToken
     $tenantId = $tenantInfo.tenantId
-#step 3: Get all Sophos Devices with pagination
+#Get all Sophos Devices with pagination
     $headers = @{
         Authorization = "Bearer $accessToken"
         "X-Tenant-ID" = $tenantId
@@ -240,7 +240,7 @@ function SortServers {
     param (
         $listSophosDevices
     )
-    #step 4: Get all non active devices
+#Get all non active servers
     $targetDate = (Get-Date).AddMonths(-6)
 
     $oldServers = [System.Collections.Generic.List[object]]::new()
@@ -253,7 +253,7 @@ function SortServers {
     }
     return $oldServers
 }
-
+###############  MAIN  ###############
 Connect-MgGraph
 $allIntuneDevices = GetAllIntuneDevices
 
@@ -274,3 +274,4 @@ $sortedServers | Select-Object hostname,lastSeenAt,type,os.name | Format-Table -
 
 #made it a command for your own safety :-), removing the command at your own risk
 #DeleteDevicesSophos -tenantInfo $tenantInfo -sortedDevices $sortedDevices -sortedServers $sortedServers
+disConnect-MgGraph
