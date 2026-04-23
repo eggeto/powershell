@@ -141,7 +141,7 @@ function Main {
         }   
     }
     write-host "The follow users have more then 1 device:" -ForegroundColor Yellow
-    $allUsersWithDoubleDevices
+    $allUsersWithDoubleDevices | Format-Table UserMail, DeviceNames, Count -AutoSize
 
     $allIntuneDevices = GetAllIntuneDevices
     $allBadSyncDevices = CheckTheDeviceIds -allIntuneDevices $allIntuneDevices
