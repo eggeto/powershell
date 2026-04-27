@@ -217,11 +217,11 @@ $(document).ready(function () {
         ],
         language: {
             search: "search:",
-            lengthMenu: "_MENU_ rijen per pagina",
-            info: "Toont _START_ tot _END_ van _TOTAL_ toestellen",
+            lengthMenu: "_MENU_ rows per page",
+            info: "Show _START_ to _END_ from _TOTAL_ devices",
             paginate: {
-                next: "Volgende",
-                previous: "Vorige"
+                next: "next",
+                previous: "previous"
             }
         }
     });
