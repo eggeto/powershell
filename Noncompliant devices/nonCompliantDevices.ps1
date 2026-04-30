@@ -167,6 +167,91 @@ function GetCompliancesDetailsPerDevice {
   }
   return $listNonCompliancePerDevice
 }  
+###############  HTML part  ###############
+function ConvvertToHTML {
+  param (
+    $allCompliance
+  )
+  $header = @'
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <style>
+  body {
+      font-family: Segoe UI;
+      background:#f8f9fa;
+      padding:40px;
+  }
+  .container{
+      background:white;
+      padding:25px;
+      border-radius:10px;
+      box-shadow:0 4px 15px rgba(0,0,0,.08);
+  }
+  h2{
+      color:#0078d4;
+  }
+  table.dataTable {
+      width:100% !important;
+  }
+  </style>
+
+  <script>
+  $(document).ready(function () {
+      $('#complianceTable').DataTable({
+          pageLength: 30,
+          autoWidth: false,
+          searching: true,
+          columnDefs: [
+              { targets: [0,1,2,3], searchable: true }
+          ],
+          language: {
+              search: "search:",
+              lengthMenu: "_MENU_ rows per page",
+              info: "Show _START_ to _END_ from _TOTAL_ devices",
+              paginate: {
+                  next: "next",
+                  previous: "previous"
+              }
+          }
+      });
+  });
+  </script>
+'@
+
+#Generate HTML 
+  $tableHtml = $allCompliance | ConvertTo-Html -Fragment
+
+#The structure of the html tables
+  $tableHtml = $tableHtml `
+  -replace '<table>', '<table id="complianceTable" class="display">' `
+  -replace '<tr><th>', '<thead><tr><th>' `
+  -replace '</th></tr>', '</th></tr></thead><tbody>' `
+  -replace '</table>', '</tbody></table>'
+
+#The HTML Page
+  $FullHtml = @"
+  <!DOCTYPE html>
+  <html lang='nl'>
+  <head>
+  <meta charset='UTF-8'>
+  $header
+  </head>
+  <body>
+  <div class='container'>
+  <h2>Non-Compliance Devices</h2>
+  $tableHtml
+  </div>
+  </body>
+  </html>
+"@
+#Write HTML file to location
+  $Path = "C:\Temp\Non-Compliance-Devices.html"
+#Open HTML
+  $FullHtml | Out-File $Path -Encoding utf8
+  Invoke-Item $Path
+}
 
 #blacklist via deviceName
 $Global:blackList = @(
@@ -180,84 +265,7 @@ $getAllCompliance = GetCompliancesDetailsPerDevice | Select-Object * -Unique |So
 #write in terminal
 $getAllCompliance
 
-###############  HTML part  ###############
-$header = @'
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-<style>
-body {
-    font-family: Segoe UI;
-    background:#f8f9fa;
-    padding:40px;
-}
-.container{
-    background:white;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 4px 15px rgba(0,0,0,.08);
-}
-h2{
-    color:#0078d4;
-}
-table.dataTable {
-    width:100% !important;
-}
-</style>
-
-<script>
-$(document).ready(function () {
-    $('#complianceTable').DataTable({
-        pageLength: 30,
-        autoWidth: false,
-        searching: true,
-        columnDefs: [
-            { targets: [0,1,2,3], searchable: true }
-        ],
-        language: {
-            search: "search:",
-            lengthMenu: "_MENU_ rows per page",
-            info: "Show _START_ to _END_ from _TOTAL_ devices",
-            paginate: {
-                next: "next",
-                previous: "previous"
-            }
-        }
-    });
-});
-</script>
-'@
-
-#Generate HTML tables
-$tableHtml = $getAllCompliance | ConvertTo-Html -Fragment
-
-#The structure of the html tables
-$tableHtml = $tableHtml `
--replace '<table>', '<table id="complianceTable" class="display">' `
--replace '<tr><th>', '<thead><tr><th>' `
--replace '</th></tr>', '</th></tr></thead><tbody>' `
--replace '</table>', '</tbody></table>'
-
-#The HTML Page
-$FullHtml = @"
-<!DOCTYPE html>
-<html lang='nl'>
-<head>
-<meta charset='UTF-8'>
-$header
-</head>
-<body>
-<div class='container'>
-<h2>Non-Compliance Devices</h2>
-$tableHtml
-</div>
-</body>
-</html>
-"@
-
-$Path = "C:\Temp\Non-Compliance-Devices.html"
-$FullHtml | Out-File $Path -Encoding utf8
-Invoke-Item $Path
+#write/open in HTML
+ConvvertToHTML -allCompliance $getAllCompliance
 
 #DisConnect-MgGraph
