@@ -219,7 +219,9 @@ function ConvvertToHTML {
   });
   </script>
 '@
-
+#time
+    $time = Get-Date -Format "dd-MM-yyyy HH:mm:ss"
+    
 #Generate HTML 
   $tableHtml = $allCompliance | ConvertTo-Html -Fragment
 
@@ -240,7 +242,7 @@ function ConvvertToHTML {
   </head>
   <body>
   <div class='container'>
-  <h2>Non-Compliance Devices</h2>
+  <h2>Non-Compliance Devices: $time</h2>
   $tableHtml
   </div>
   </body>
