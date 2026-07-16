@@ -1,5 +1,18 @@
+<#
+.SYNOPSIS
+    Collect the monitors/screens that are connect to the device
+    and send it to log analytics via remediation script.
+ 
+.DESCRIPTION
+    Collect the monitors/screens that are connect to the device
+    and send it to log analytics via remediation script.
+    also check the readme.md for more info and an example from the output.
+    An example workbook is also available.
 
-
+.NOTES
+    - 16/07/2026 addes synopsis
+#>
+#collect monitor/screen info
 function GetMonitorInfo {
     param (
         
@@ -29,7 +42,7 @@ function GetMonitorInfo {
     }
     return $userMonitor
 }
-
+#create token for Log Analyctics
 function CreateToken {
     param (
         $tenantId,
@@ -50,7 +63,7 @@ function CreateToken {
         return $false
     }
 }
-
+#write GetMonitorInfo to Log Analyctics
 function PostToLogAnalytics {
     param (
         $bearerToken,
@@ -105,6 +118,3 @@ else {
     write-host "token is not created, exiting script"
     exit 1
 }
-                                    
-                                  
-
