@@ -150,7 +150,7 @@ function Main {
 }
 
 Connect-mgGraph
-$groupId = "291a3ee7-5fcb-4d8d-ac14-0b108f2b8f7c"
+$groupId = "GROUP ID"
 Main -groupId $groupId
 
 #disConnect-mgGraph
